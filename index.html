@@ -3,212 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v1.5</title>
+    <title>职场透镜 (Project Lens) v1.6</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
+        /* All CSS remains the same */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap');
-
-        :root {
-            --background-color: #121212;
-            --surface-color: #1e1e1e;
-            --primary-color: #9b59b6;
-            --text-color: #e0e0e0;
-            --text-secondary-color: #a0a0a0;
-            --border-color: #333;
-            --card-padding: 30px;
-        }
-
-        html.light-mode {
-            --background-color: #f4f5f7;
-            --surface-color: #ffffff;
-            --primary-color: #007bff;
-            --text-color: #333333;
-            --text-secondary-color: #777777;
-            --border-color: #e0e0e0;
-        }
-
-        body {
-            font-family: 'Inter', 'Noto Sans SC', 'Noto Sans TC', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .header {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto 20px auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .control-button {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary-color);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .theme-switcher {
-            font-size: 24px;
-            border: none;
-            padding: 5px;
-        }
-        .control-button:hover {
-            color: var(--text-color);
-            background-color: var(--surface-color);
-        }
-        .hidden {
-            display: none;
-        }
-
-        .main-container {
-            display: flex;
-            gap: 20px;
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            height: calc(100vh - 100px);
-        }
-
-        .panel {
-            background-color: var(--surface-color);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            padding: var(--card-padding);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: background-color 0.3s, border-color 0.3s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-panel {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .output-panel {
-            flex: 1;
-            overflow-y: auto;
-        }
-        
-        h1 {
-            font-size: 28px;
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: var(--text-secondary-color);
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        textarea, input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 15px;
-            box-sizing: border-box;
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-        textarea {
-            resize: vertical;
-        }
-
-        .analyze-button {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: auto;
-        }
-        .analyze-button:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-
-        #result-container {
-            line-height: 1.7;
-        }
-        #result-container h2 {
-            font-size: 20px;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 5px;
-            margin-top: 25px;
-        }
-        .sources-container {
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        .sources-container a {
-            color: var(--text-secondary-color);
-            text-decoration: none;
-            display: block;
-            margin-bottom: 5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .sources-container a:hover {
-            text-decoration: underline;
-        }
-        
-        .spinner {
-            border: 3px solid rgba(255,255,255,0.2);
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border-left-color: #fff;
-            animation: spin 1s ease infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 10px;
-        }
+        :root { --background-color: #121212; --surface-color: #1e1e1e; --primary-color: #9b59b6; --text-color: #e0e0e0; --text-secondary-color: #a0a0a0; --border-color: #333; --card-padding: 30px; }
+        html.light-mode { --background-color: #f4f5f7; --surface-color: #ffffff; --primary-color: #007bff; --text-color: #333333; --text-secondary-color: #777777; --border-color: #e0e0e0; }
+        body { font-family: 'Inter', 'Noto Sans SC', 'Noto Sans TC', sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 20px; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
+        .header { width: 100%; max-width: 1400px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 700; }
+        .controls { display: flex; align-items: center; gap: 15px; }
+        .control-button { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); cursor: pointer; font-size: 16px; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .theme-switcher { font-size: 24px; border: none; padding: 5px; }
+        .control-button:hover { color: var(--text-color); background-color: var(--surface-color); }
+        .hidden { display: none; }
+        .main-container { display: flex; gap: 20px; width: 100%; max-width: 1400px; margin: 0 auto; height: calc(100vh - 100px); }
+        .panel { background-color: var(--surface-color); border-radius: 16px; border: 1px solid var(--border-color); padding: var(--card-padding); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: background-color 0.3s, border-color 0.3s; display: flex; flex-direction: column; }
+        .input-panel, .output-panel { flex: 1; overflow-y: auto; }
+        h1 { font-size: 28px; margin-top: 0; margin-bottom: 10px; }
+        .subtitle { color: var(--text-secondary-color); margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 500; margin-bottom: 8px; font-size: 14px; }
+        textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 15px; box-sizing: border-box; background-color: var(--background-color); color: var(--text-color); }
+        textarea { resize: vertical; }
+        .analyze-button { width: 100%; padding: 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin-top: auto; }
+        .analyze-button:disabled { background: #555; cursor: not-allowed; }
+        #result-container { line-height: 1.7; }
+        #result-container h2 { font-size: 20px; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 25px; }
+        .sources-container { margin-top: 20px; font-size: 14px; }
+        .sources-container a { color: var(--text-secondary-color); text-decoration: none; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sources-container a:hover { text-decoration: underline; }
+        .spinner { border: 3px solid rgba(255,255,255,0.2); width: 18px; height: 18px; border-radius: 50%; border-left-color: #fff; animation: spin 1s ease infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -234,9 +61,15 @@
                     <input type="text" id="company-name" data-key-placeholder="company_name_placeholder">
                 </div>
 
+                <!-- 【重要更新】增加了职位名称输入框 -->
+                <div class="form-group">
+                    <label for="job-title" data-key="job_title_label">职位名称 (可选)</label>
+                    <input type="text" id="job-title" data-key-placeholder="job_title_placeholder">
+                </div>
+
                 <div class="form-group">
                     <label for="resume-text" data-key="resume_label">我的简历 / 个人简介 (可选)</label>
-                    <textarea id="resume-text" rows="8" data-key-placeholder="resume_placeholder"></textarea>
+                    <textarea id="resume-text" rows="6" data-key-placeholder="resume_placeholder"></textarea>
                 </div>
             </div>
             <button class="analyze-button" id="analyze-button">
@@ -249,28 +82,27 @@
                 <h2 data-key="result_placeholder_title">分析报告</h2>
                 <p data-key="result_placeholder_text" style="color: var(--text-secondary-color);">（请输入公司名后点击分析）</p>
             </div>
-            <div class="sources-container" id="sources-container">
-                <!-- Information sources will be listed here -->
-            </div>
+            <div class="sources-container" id="sources-container"></div>
         </section>
     </main>
 
     <script>
-        // --- Elements ---
+        // --- 1. 元素获取 ---
+        const companyNameInput = document.getElementById('company-name');
+        const jobTitleInput = document.getElementById('job-title'); // 【重要更新】获取新元素
+        const resumeTextInput = document.getElementById('resume-text');
         const analyzeButton = document.getElementById('analyze-button');
         const resultContainer = document.getElementById('result-container');
         const sourcesContainer = document.getElementById('sources-container');
-        const companyNameInput = document.getElementById('company-name');
-        const resumeTextInput = document.getElementById('resume-text');
         const themeSwitcher = document.getElementById('theme-switcher');
         const logo = document.getElementById('logo');
         const langSwitcherMain = document.getElementById('lang-switcher-main');
         const langSwitcherZh = document.getElementById('lang-switcher-zh');
 
-        // --- API Config ---
+        // --- 2. API 配置 ---
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
-        // --- i18n ---
+        // --- 3. 国际化 (i18n) 配置 ---
         const translations = {
             'zh-CN': {
                 logo_text: '🔬 职场透镜',
@@ -278,6 +110,8 @@
                 subtitle: 'AI将自动搜索并分析该公司',
                 company_name_label: '公司名称',
                 company_name_placeholder: '例如：Western University',
+                job_title_label: '职位名称 (可选)', // 【重要更新】增加翻译
+                job_title_placeholder: '例如：Software Engineer, Marketing Manager', // 【重要更新】增加翻译
                 resume_label: '我的简历 / 个人简介 (可选)',
                 resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...',
                 button_text: '开始分析',
@@ -287,8 +121,6 @@
                 sources_title: '信息来源:',
                 lang_switcher_main_text: 'Switch to English',
                 lang_switcher_zh_text: '切換到繁體',
-                error_prefix: '发生错误: ',
-                connection_error: '发生连接错误，请检查浏览器控制台(F12)的报错信息。'
             },
             'zh-TW': {
                 logo_text: '🔬 職場透鏡',
@@ -296,6 +128,8 @@
                 subtitle: 'AI將自動搜索並分析該公司',
                 company_name_label: '公司名稱',
                 company_name_placeholder: '例如：Western University',
+                job_title_label: '職位名稱 (可選)', // 【重要更新】增加翻译
+                job_title_placeholder: '例如：Software Engineer, Marketing Manager', // 【重要更新】增加翻译
                 resume_label: '我的履歷 / 個人簡介 (可選)',
                 resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...',
                 button_text: '開始分析',
@@ -305,8 +139,6 @@
                 sources_title: '資訊來源:',
                 lang_switcher_main_text: 'Switch to English',
                 lang_switcher_zh_text: '切换到简体',
-                error_prefix: '發生錯誤: ',
-                connection_error: '發生連接錯誤，請檢查瀏覽器控制台(F12)的報錯資訊。'
             },
             'en': {
                 logo_text: '🔬 Project Lens',
@@ -314,6 +146,8 @@
                 subtitle: 'AI will automatically search and analyze the company',
                 company_name_label: 'Company Name',
                 company_name_placeholder: 'e.g., Western University',
+                job_title_label: 'Job Title (Optional)', // 【重要更新】增加翻译
+                job_title_placeholder: 'e.g., Software Engineer, Marketing Manager', // 【重要更新】增加翻译
                 resume_label: 'My Resume / Bio (Optional)',
                 resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...',
                 button_text: 'Analyze',
@@ -322,12 +156,10 @@
                 result_placeholder_text: '(Enter a company name and click Analyze)',
                 sources_title: 'Information Sources:',
                 lang_switcher_main_text: '切换到中文',
-                lang_switcher_zh_text: '',
-                error_prefix: 'An error occurred: ',
-                connection_error: 'Connection error. Please check the browser console (F12) for details.'
             }
         };
 
+        // --- 4. 核心逻辑 ---
         let currentLang = 'zh-CN';
         let lastUsedChineseLang = 'zh-CN';
 
@@ -356,11 +188,6 @@
             localStorage.setItem('theme', theme);
         }
 
-        // --- Event Listeners ---
-        langSwitcherMain.addEventListener('click', () => setLanguage(currentLang === 'en' ? lastUsedChineseLang : 'en'));
-        langSwitcherZh.addEventListener('click', () => setLanguage(currentLang === 'zh-CN' ? 'zh-TW' : 'zh-CN'));
-        themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
-
         analyzeButton.addEventListener('click', async function() {
             const t = translations[currentLang];
             const buttonTextSpan = analyzeButton.querySelector('span');
@@ -373,6 +200,7 @@
 
             const data = {
                 companyName: companyNameInput.value,
+                jobTitle: jobTitleInput.value, // 【重要更新】发送职位名称
                 resumeText: resumeTextInput.value,
                 language: currentLang
             };
@@ -383,9 +211,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data),
                 });
-
                 const result = await response.json();
-                
                 if (response.ok) {
                     resultContainer.innerHTML = DOMPurify.sanitize(marked.parse(result.analysis));
                     if (result.sources && result.sources.length > 0) {
@@ -396,11 +222,10 @@
                         sourcesContainer.innerHTML = sourcesHTML;
                     }
                 } else {
-                    resultContainer.textContent = t.error_prefix + result.error;
+                    resultContainer.textContent = (t.error_prefix || 'Error: ') + result.error;
                 }
-
             } catch (error) {
-                resultContainer.textContent = t.connection_error;
+                resultContainer.textContent = t.connection_error || 'Connection error.';
             } finally {
                 buttonTextSpan.textContent = t.button_text;
                 if(analyzeButton.querySelector('.spinner')) {
@@ -410,11 +235,13 @@
             }
         });
 
-        // --- Init ---
+        // --- 5. 初始化 ---
+        langSwitcherMain.addEventListener('click', () => setLanguage(currentLang === 'en' ? lastUsedChineseLang : 'en'));
+        langSwitcherZh.addEventListener('click', () => setLanguage(currentLang === 'zh-CN' ? 'zh-TW' : 'zh-CN'));
+        themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
+        
         setTheme(localStorage.getItem('theme') || 'dark');
         setLanguage('zh-CN');
     </script>
 </body>
-</html>
-
 </html>
