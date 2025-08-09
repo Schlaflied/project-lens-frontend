@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens)</title>
+    <title>职场透镜 (Project Lens) v1.5</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -106,6 +106,7 @@
 
         .input-panel {
             flex: 1;
+            overflow-y: auto;
         }
 
         .output-panel {
@@ -146,31 +147,7 @@
             color: var(--text-color);
         }
         textarea {
-            min-height: 150px;
             resize: vertical;
-        }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .tag-checkbox {
-            display: none;
-        }
-        .tag-label {
-            padding: 6px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        .tag-checkbox:checked + .tag-label {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
         }
 
         .analyze-button {
@@ -204,6 +181,22 @@
             padding-bottom: 5px;
             margin-top: 25px;
         }
+        .sources-container {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .sources-container a {
+            color: var(--text-secondary-color);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sources-container a:hover {
+            text-decoration: underline;
+        }
         
         .spinner {
             border: 3px solid rgba(255,255,255,0.2);
@@ -234,21 +227,16 @@
         <section class="panel input-panel">
             <div>
                 <h1 data-key="title">输入信息</h1>
-                <p class="subtitle" data-key="subtitle">提供越多细节，AI分析越精准</p>
+                <p class="subtitle" data-key="subtitle">AI将自动搜索并分析该公司</p>
                 
                 <div class="form-group">
-                    <label for="company-text" data-key="main_input_label">公司简介 / JD / 评价</label>
-                    <textarea id="company-text" data-key-placeholder="placeholder"></textarea>
+                    <label for="company-name" data-key="company_name_label">公司名称</label>
+                    <input type="text" id="company-name" data-key-placeholder="company_name_placeholder">
                 </div>
 
                 <div class="form-group">
-                    <label data-key="culture_tags_label">企业文化标签 (可选)</label>
-                    <div class="tags-container" id="tags-container"></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="company-type" data-key="company_type_label">公司性质 (可选)</label>
-                    <input type="text" id="company-type" data-key-placeholder="company_type_placeholder">
+                    <label for="resume-text" data-key="resume_label">我的简历 / 个人简介 (可选)</label>
+                    <textarea id="resume-text" rows="8" data-key-placeholder="resume_placeholder"></textarea>
                 </div>
             </div>
             <button class="analyze-button" id="analyze-button">
@@ -259,43 +247,44 @@
         <section class="panel output-panel">
             <div id="result-container">
                 <h2 data-key="result_placeholder_title">分析报告</h2>
-                <p data-key="result_placeholder_text" style="color: var(--text-secondary-color);">（AI的分析报告将显示在这里）</p>
+                <p data-key="result_placeholder_text" style="color: var(--text-secondary-color);">（请输入公司名后点击分析）</p>
+            </div>
+            <div class="sources-container" id="sources-container">
+                <!-- Information sources will be listed here -->
             </div>
         </section>
     </main>
 
     <script>
-        // --- 1. 元素获取 ---
+        // --- Elements ---
         const analyzeButton = document.getElementById('analyze-button');
         const resultContainer = document.getElementById('result-container');
-        const companyTextInput = document.getElementById('company-text');
-        const companyTypeInput = document.getElementById('company-type');
+        const sourcesContainer = document.getElementById('sources-container');
+        const companyNameInput = document.getElementById('company-name');
+        const resumeTextInput = document.getElementById('resume-text');
         const themeSwitcher = document.getElementById('theme-switcher');
-        const tagsContainer = document.getElementById('tags-container');
         const logo = document.getElementById('logo');
         const langSwitcherMain = document.getElementById('lang-switcher-main');
         const langSwitcherZh = document.getElementById('lang-switcher-zh');
 
-        // --- 2. API 配置 ---
+        // --- API Config ---
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
-        // --- 3. 国际化 (i18n) 配置 ---
+        // --- i18n ---
         const translations = {
             'zh-CN': {
                 logo_text: '🔬 职场透镜',
                 title: '输入信息',
-                subtitle: '提供越多细节，AI分析越精准',
-                main_input_label: '公司简介 / JD / 评价',
-                placeholder: '请粘贴公司简介, JD, 或任何来自Glassdoor/LinkedIn/脉脉的评价文本...',
-                culture_tags_label: '企业文化标签 (可选)',
-                // 【重要更新】增加了更丰富的文化标签
-                tags: {'996':'996', '加班文化':'加班文化', 'WLB':'WLB', '弹性工作':'弹性工作', '远程办公':'远程办公', '扁平管理':'扁平管理', '等级森严':'等级森严', '团队合作':'团队合作', '福利好':'福利好', '培训机会':'培训机会', '国际化':'国际化', '结果导向':'结果导向'},
-                company_type_label: '公司性质 (可选)',
-                company_type_placeholder: '例如: FMCG, 科技, 制造业',
+                subtitle: 'AI将自动搜索并分析该公司',
+                company_name_label: '公司名称',
+                company_name_placeholder: '例如：Western University',
+                resume_label: '我的简历 / 个人简介 (可选)',
+                resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...',
                 button_text: '开始分析',
-                button_loading_text: '分析中...',
+                button_loading_text: '搜索分析中...',
                 result_placeholder_title: '分析报告',
-                result_placeholder_text: '（AI的分析报告将显示在这里）',
+                result_placeholder_text: '（请输入公司名后点击分析）',
+                sources_title: '信息来源:',
                 lang_switcher_main_text: 'Switch to English',
                 lang_switcher_zh_text: '切換到繁體',
                 error_prefix: '发生错误: ',
@@ -304,18 +293,16 @@
             'zh-TW': {
                 logo_text: '🔬 職場透鏡',
                 title: '輸入資訊',
-                subtitle: '提供越多細節，AI分析越精準',
-                main_input_label: '公司簡介 / JD / 評價',
-                placeholder: '請貼上公司簡介, JD, 或任何來自Glassdoor/LinkedIn/脈脈的評價文本...',
-                culture_tags_label: '企業文化標籤 (可選)',
-                // 【重要更新】增加了更豐富的文化標籤
-                tags: {'996':'996', '加班文化':'加班文化', 'WLB':'WLB', '彈性工作':'弹性工作', '遠程辦公':'远程办公', '扁平管理':'扁平管理', '等級森嚴':'等级森严', '團隊合作':'團隊合作', '福利好':'福利好', '培訓機會':'培训机会', '國際化':'国际化', '結果導向':'结果导向'},
-                company_type_label: '公司性質 (可選)',
-                company_type_placeholder: '例如: FMCG, 科技, 製造業',
+                subtitle: 'AI將自動搜索並分析該公司',
+                company_name_label: '公司名稱',
+                company_name_placeholder: '例如：Western University',
+                resume_label: '我的履歷 / 個人簡介 (可選)',
+                resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...',
                 button_text: '開始分析',
-                button_loading_text: '分析中...',
+                button_loading_text: '搜索分析中...',
                 result_placeholder_title: '分析報告',
-                result_placeholder_text: '（AI的分析報告將顯示在這裡）',
+                result_placeholder_text: '（請輸入公司名後點擊分析）',
+                sources_title: '資訊來源:',
                 lang_switcher_main_text: 'Switch to English',
                 lang_switcher_zh_text: '切换到简体',
                 error_prefix: '發生錯誤: ',
@@ -324,20 +311,18 @@
             'en': {
                 logo_text: '🔬 Project Lens',
                 title: 'Input Information',
-                subtitle: 'The more details you provide, the more accurate the analysis.',
-                main_input_label: 'Company Bio / JD / Reviews',
-                placeholder: 'Paste company description, job description, or any reviews from Glassdoor/LinkedIn...',
-                culture_tags_label: 'Culture Tags (Optional)',
-                // 【重要更新】增加了更丰富的文化标签
-                tags: {'996':'996', 'Overtime Culture':'加班文化', 'WLB':'WLB', 'Flexible Work':'弹性工作', 'Remote Work':'远程办公', 'Flat Hierarchy':'扁平管理', 'Hierarchical':'等级森严', 'Teamwork':'团队合作', 'Good Benefits':'福利好', 'Training':'培训机会', 'International':'国际化', 'Result-Oriented':'结果导向'},
-                company_type_label: 'Company Type (Optional)',
-                company_type_placeholder: 'e.g., FMCG, Tech, Manufacturing',
+                subtitle: 'AI will automatically search and analyze the company',
+                company_name_label: 'Company Name',
+                company_name_placeholder: 'e.g., Western University',
+                resume_label: 'My Resume / Bio (Optional)',
+                resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...',
                 button_text: 'Analyze',
-                button_loading_text: 'Analyzing...',
+                button_loading_text: 'Searching & Analyzing...',
                 result_placeholder_title: 'Analysis Report',
-                result_placeholder_text: '(AI analysis report will be displayed here)',
+                result_placeholder_text: '(Enter a company name and click Analyze)',
+                sources_title: 'Information Sources:',
                 lang_switcher_main_text: '切换到中文',
-                lang_switcher_zh_text: '', // This button will be hidden in English
+                lang_switcher_zh_text: '',
                 error_prefix: 'An error occurred: ',
                 connection_error: 'Connection error. Please check the browser console (F12) for details.'
             }
@@ -350,18 +335,11 @@
             currentLang = langCode;
             document.documentElement.lang = langCode;
             const t = translations[langCode];
-            
             logo.textContent = t.logo_text;
             langSwitcherMain.textContent = t.lang_switcher_main_text;
             langSwitcherZh.textContent = t.lang_switcher_zh_text;
-
-            if (langCode === 'en') {
-                langSwitcherZh.classList.add('hidden');
-            } else {
-                langSwitcherZh.classList.remove('hidden');
-                lastUsedChineseLang = langCode;
-            }
-
+            langSwitcherZh.classList.toggle('hidden', langCode === 'en');
+            if (langCode !== 'en') lastUsedChineseLang = langCode;
             document.querySelectorAll('[data-key]').forEach(elem => {
                 const key = elem.getAttribute('data-key');
                 if (t[key]) elem.textContent = t[key];
@@ -370,45 +348,18 @@
                 const key = elem.getAttribute('data-key-placeholder');
                 if (t[key]) elem.placeholder = t[key];
             });
-
-            tagsContainer.innerHTML = '';
-            for (const [key, value] of Object.entries(t.tags)) {
-                const tagId = `tag-${value.replace(/\s/g, '-')}`;
-                tagsContainer.innerHTML += `
-                    <input type="checkbox" id="${tagId}" class="tag-checkbox" value="${value}">
-                    <label for="${tagId}" class="tag-label">${key}</label>
-                `;
-            }
         }
 
-        // --- 4. 主题切换 ---
         function setTheme(theme) {
-            if (theme === 'light') {
-                document.documentElement.classList.add('light-mode');
-                themeSwitcher.textContent = '🌙';
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.classList.remove('light-mode');
-                themeSwitcher.textContent = '☀️';
-                localStorage.setItem('theme', 'dark');
-            }
+            document.documentElement.classList.toggle('light-mode', theme === 'light');
+            themeSwitcher.textContent = theme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', theme);
         }
 
-        // --- 5. 事件监听器 ---
-        langSwitcherMain.addEventListener('click', () => {
-            const newLang = currentLang === 'en' ? lastUsedChineseLang : 'en';
-            setLanguage(newLang);
-        });
-
-        langSwitcherZh.addEventListener('click', () => {
-            const newLang = currentLang === 'zh-CN' ? 'zh-TW' : 'zh-CN';
-            setLanguage(newLang);
-        });
-
-        themeSwitcher.addEventListener('click', () => {
-            const newTheme = document.documentElement.classList.contains('light-mode') ? 'dark' : 'light';
-            setTheme(newTheme);
-        });
+        // --- Event Listeners ---
+        langSwitcherMain.addEventListener('click', () => setLanguage(currentLang === 'en' ? lastUsedChineseLang : 'en'));
+        langSwitcherZh.addEventListener('click', () => setLanguage(currentLang === 'zh-CN' ? 'zh-TW' : 'zh-CN'));
+        themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
 
         analyzeButton.addEventListener('click', async function() {
             const t = translations[currentLang];
@@ -418,18 +369,11 @@
             analyzeButton.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
             analyzeButton.disabled = true;
             resultContainer.innerHTML = `<h2 data-key="result_placeholder_title">${t.result_placeholder_title}</h2><p>${t.button_loading_text}</p>`;
-
-            const selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
-            let combinedText = companyTextInput.value;
-            if (selectedTags.length > 0) {
-                combinedText += `\n\n[附加信息] 已知文化标签: ${selectedTags.join(', ')}`;
-            }
-            if (companyTypeInput.value.trim()) {
-                combinedText += `\n[附加信息] 公司性质: ${companyTypeInput.value.trim()}`;
-            }
+            sourcesContainer.innerHTML = '';
 
             const data = {
-                text: combinedText,
+                companyName: companyNameInput.value,
+                resumeText: resumeTextInput.value,
                 language: currentLang
             };
 
@@ -444,6 +388,13 @@
                 
                 if (response.ok) {
                     resultContainer.innerHTML = DOMPurify.sanitize(marked.parse(result.analysis));
+                    if (result.sources && result.sources.length > 0) {
+                        let sourcesHTML = `<h2>${t.sources_title}</h2>`;
+                        result.sources.forEach(source => {
+                            sourcesHTML += `<a href="${source.link}" target="_blank" rel="noopener noreferrer">${source.title}</a>`;
+                        });
+                        sourcesContainer.innerHTML = sourcesHTML;
+                    }
                 } else {
                     resultContainer.textContent = t.error_prefix + result.error;
                 }
@@ -459,11 +410,11 @@
             }
         });
 
-        // --- 6. 初始化 ---
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        setTheme(savedTheme);
+        // --- Init ---
+        setTheme(localStorage.getItem('theme') || 'dark');
         setLanguage('zh-CN');
-
     </script>
 </body>
+</html>
+
 </html>
