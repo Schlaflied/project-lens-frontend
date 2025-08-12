@@ -61,7 +61,6 @@
                     <input type="text" id="company-name" data-key-placeholder="company_name_placeholder">
                 </div>
 
-                <!-- 【重要更新】增加了职位名称输入框 -->
                 <div class="form-group">
                     <label for="job-title" data-key="job_title_label">职位名称 (可选)</label>
                     <input type="text" id="job-title" data-key-placeholder="job_title_placeholder">
@@ -89,7 +88,7 @@
     <script>
         // --- 1. 元素获取 ---
         const companyNameInput = document.getElementById('company-name');
-        const jobTitleInput = document.getElementById('job-title'); // 【重要更新】获取新元素
+        const jobTitleInput = document.getElementById('job-title');
         const resumeTextInput = document.getElementById('resume-text');
         const analyzeButton = document.getElementById('analyze-button');
         const resultContainer = document.getElementById('result-container');
@@ -109,9 +108,9 @@
                 title: '输入信息',
                 subtitle: 'AI将自动搜索并分析该公司',
                 company_name_label: '公司名称',
-                company_name_placeholder: '例如：Western University',
-                job_title_label: '职位名称 (可选)', // 【重要更新】增加翻译
-                job_title_placeholder: '例如：Software Engineer, Marketing Manager', // 【重要更新】增加翻译
+                company_name_placeholder: '例如：西安大略大学', // 【重要更新】
+                job_title_label: '职位名称 (可选)',
+                job_title_placeholder: '例如：软件工程师, 市场经理', // 【重要更新】
                 resume_label: '我的简历 / 个人简介 (可选)',
                 resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...',
                 button_text: '开始分析',
@@ -127,9 +126,9 @@
                 title: '輸入資訊',
                 subtitle: 'AI將自動搜索並分析該公司',
                 company_name_label: '公司名稱',
-                company_name_placeholder: '例如：Western University',
-                job_title_label: '職位名稱 (可選)', // 【重要更新】增加翻译
-                job_title_placeholder: '例如：Software Engineer, Marketing Manager', // 【重要更新】增加翻译
+                company_name_placeholder: '例如：西安大略大學', // 【重要更新】
+                job_title_label: '職位名稱 (可選)',
+                job_title_placeholder: '例如：軟體工程師, 市場經理', // 【重要更新】
                 resume_label: '我的履歷 / 個人簡介 (可選)',
                 resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...',
                 button_text: '開始分析',
@@ -146,8 +145,8 @@
                 subtitle: 'AI will automatically search and analyze the company',
                 company_name_label: 'Company Name',
                 company_name_placeholder: 'e.g., Western University',
-                job_title_label: 'Job Title (Optional)', // 【重要更新】增加翻译
-                job_title_placeholder: 'e.g., Software Engineer, Marketing Manager', // 【重要更新】增加翻译
+                job_title_label: 'Job Title (Optional)',
+                job_title_placeholder: 'e.g., Software Engineer, Marketing Manager',
                 resume_label: 'My Resume / Bio (Optional)',
                 resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...',
                 button_text: 'Analyze',
@@ -200,7 +199,7 @@
 
             const data = {
                 companyName: companyNameInput.value,
-                jobTitle: jobTitleInput.value, // 【重要更新】发送职位名称
+                jobTitle: jobTitleInput.value,
                 resumeText: resumeTextInput.value,
                 language: currentLang
             };
