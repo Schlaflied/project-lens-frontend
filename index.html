@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v3.0</title>
+    <title>职场透镜 (Project Lens) v3.2</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -37,35 +37,11 @@
         .citation-link { color: var(--primary-color); text-decoration: none; font-weight: bold; vertical-align: super; font-size: 0.8em; margin: 0 2px; }
         .citation-link:hover { text-decoration: underline; }
         .source-item { padding: 2px 0; }
-
-        /* --- 【全新UI样式】语言切换按钮组 --- */
-        .lang-toggle {
-            display: flex;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            overflow: hidden;
-            background-color: var(--surface-color);
-        }
-        .lang-toggle button {
-            background: none;
-            border: none;
-            color: var(--text-secondary-color);
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        .lang-toggle button:not(:last-child) {
-            border-right: 1px solid var(--border-color);
-        }
-        .lang-toggle button.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        .lang-toggle button:hover:not(.active) {
-            color: var(--text-color);
-        }
+        .lang-toggle { display: flex; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; background-color: var(--surface-color); }
+        .lang-toggle button { background: none; border: none; color: var(--text-secondary-color); padding: 8px 16px; cursor: pointer; transition: all 0.2s ease-in-out; font-size: 15px; font-weight: 500; }
+        .lang-toggle button:not(:last-child) { border-right: 1px solid var(--border-color); }
+        .lang-toggle button.active { background-color: var(--primary-color); color: white; }
+        .lang-toggle button:hover:not(.active) { color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -74,7 +50,6 @@
         <div class="logo" id="logo">🔬 职场透镜</div>
         <div class="controls">
             <button class="theme-switcher" id="theme-switcher">☀️</button>
-            <!-- 【全新HTML结构】语言切换按钮组 -->
             <div class="lang-toggle" id="lang-toggle">
                 <button data-lang="zh-CN">简</button>
                 <button data-lang="zh-TW">繁</button>
@@ -116,7 +91,7 @@
     </main>
 
     <script>
-        // --- 1. 元素获取 (已更新) ---
+        // --- 1. 元素获取 (无变化) ---
         const companyNameInput = document.getElementById('company-name');
         const jobTitleInput = document.getElementById('job-title');
         const resumeTextInput = document.getElementById('resume-text');
@@ -125,19 +100,19 @@
         const sourcesContainer = document.getElementById('sources-container');
         const themeSwitcher = document.getElementById('theme-switcher');
         const logo = document.getElementById('logo');
-        const langToggle = document.getElementById('lang-toggle'); // 新增
+        const langToggle = document.getElementById('lang-toggle');
 
         // --- 2. API 配置 (无变化) ---
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
-        // --- 3. 国际化 (i18n) 配置 (已简化) ---
+        // --- 3. 国际化 (i18n) 配置 (已更新) ---
         const translations = {
-            'zh-CN': { logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析该公司', company_name_label: '公司名称', company_name_placeholder: '例如：小米', job_title_label: '职位名称 (可选)', job_title_placeholder: '例如：软件工程师, 市场经理', resume_label: '我的简历 / 个人简介 (可选)', resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...', button_text: '开始分析', button_loading_text: '搜索分析中...', result_placeholder_title: '分析报告', result_placeholder_text: '（请输入公司名后点击分析）', sources_title: '引用来源:' },
-            'zh-TW': { logo_text: '🔬 職場透鏡', title: '輸入資訊', subtitle: 'AI將自動搜索並分析該公司', company_name_label: '公司名稱', company_name_placeholder: '例如：小米', job_title_label: '職位名稱 (可選)', job_title_placeholder: '例如：軟體工程師, 市場經理', resume_label: '我的履歷 / 個人簡介 (可選)', resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...', button_text: '開始分析', button_loading_text: '搜索分析中...', result_placeholder_title: '分析報告', result_placeholder_text: '（請輸入公司名後點擊分析）', sources_title: '資訊來源:' },
-            'en':    { logo_text: '🔬 Project Lens', title: 'Input Information', subtitle: 'AI will automatically search and analyze the company', company_name_label: 'Company Name', company_name_placeholder: 'e.g., Xiaomi', job_title_label: 'Job Title (Optional)', job_title_placeholder: 'e.g., Software Engineer, Marketing Manager', resume_label: 'My Resume / Bio (Optional)', resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...', button_text: 'Analyze', button_loading_text: 'Searching & Analyzing...', result_placeholder_title: 'Analysis Report', result_placeholder_text: '(Enter a company name and click Analyze)', sources_title: 'References:' }
+            'zh-CN': { logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析该公司', company_name_label: '公司名称', company_name_placeholder: '例如：西安大略大学', job_title_label: '职位名称 (可选)', job_title_placeholder: '例如：软件工程师, 市场经理', resume_label: '我的简历 / 个人简介 (可选)', resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...', button_text: '开始分析', button_loading_text: '搜索分析中...', result_placeholder_title: '分析报告', result_placeholder_text: '（请输入公司名后点击分析）', sources_title: '引用来源:' },
+            'zh-TW': { logo_text: '🔬 職場透鏡', title: '輸入資訊', subtitle: 'AI將自動搜索並分析該公司', company_name_label: '公司名稱', company_name_placeholder: '例如：西安大略大學', job_title_label: '職位名稱 (可選)', job_title_placeholder: '例如：軟體工程師, 市場經理', resume_label: '我的履歷 / 個人簡介 (可選)', resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...', button_text: '開始分析', button_loading_text: '搜索分析中...', result_placeholder_title: '分析報告', result_placeholder_text: '（請輸入公司名後點擊分析）', sources_title: '資訊來源:' },
+            'en':    { logo_text: '🔬 Project Lens', title: 'Input Information', subtitle: 'AI will automatically search and analyze the company', company_name_label: 'Company Name', company_name_placeholder: 'e.g., University of Western Ontario', job_title_label: 'Job Title (Optional)', job_title_placeholder: 'e.g., Software Engineer, Marketing Manager', resume_label: 'My Resume / Bio (Optional)', resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...', button_text: 'Analyze', button_loading_text: 'Searching & Analyzing...', result_placeholder_title: 'Analysis Report', result_placeholder_text: '(Enter a company name and click Analyze)', sources_title: 'References:' }
         };
 
-        // --- 4. 核心逻辑 (已升级) ---
+        // --- 4. 核心逻辑 (无变化) ---
         let currentLang = 'zh-CN';
 
         function setLanguage(langCode) {
@@ -145,7 +120,6 @@
             document.documentElement.lang = langCode;
             const t = translations[langCode];
             
-            // 更新所有文本
             document.querySelectorAll('[data-key]').forEach(elem => {
                 const key = elem.getAttribute('data-key');
                 if (t[key]) elem.textContent = t[key];
@@ -156,7 +130,6 @@
             });
             logo.textContent = t.logo_text;
 
-            // 更新按钮组的激活状态
             langToggle.querySelectorAll('button').forEach(button => {
                 button.classList.toggle('active', button.dataset.lang === langCode);
             });
@@ -206,10 +179,9 @@
             }
         });
 
-        // --- 5. 初始化 (已更新) ---
+        // --- 5. 初始化 (无变化) ---
         themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
         
-        // 新的语言切换事件监听
         langToggle.addEventListener('click', (event) => {
             if (event.target.tagName === 'BUTTON') {
                 const langCode = event.target.dataset.lang;
@@ -219,9 +191,8 @@
             }
         });
         
-        // 页面加载时初始化
         setTheme(localStorage.getItem('theme') || 'dark');
-        setLanguage('zh-CN'); // 默认语言
+        setLanguage('zh-CN');
     </script>
 </body>
 </html>
