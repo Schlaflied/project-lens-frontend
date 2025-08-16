@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v1.6</title>
+    <title>职场透镜 (Project Lens) v3.0</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
-        /* All CSS remains the same */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap');
         :root { --background-color: #121212; --surface-color: #1e1e1e; --primary-color: #9b59b6; --text-color: #e0e0e0; --text-secondary-color: #a0a0a0; --border-color: #333; --card-padding: 30px; }
         html.light-mode { --background-color: #f4f5f7; --surface-color: #ffffff; --primary-color: #007bff; --text-color: #333333; --text-secondary-color: #777777; --border-color: #e0e0e0; }
@@ -15,10 +14,8 @@
         .header { width: 100%; max-width: 1400px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 24px; font-weight: 700; }
         .controls { display: flex; align-items: center; gap: 15px; }
-        .control-button { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); cursor: pointer; font-size: 16px; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .theme-switcher { font-size: 24px; border: none; padding: 5px; }
-        .control-button:hover { color: var(--text-color); background-color: var(--surface-color); }
-        .hidden { display: none; }
+        .theme-switcher { background: none; border: 1px solid var(--border-color); color: var(--text-secondary-color); cursor: pointer; font-size: 24px; padding: 5px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .theme-switcher:hover { color: var(--text-color); background-color: var(--surface-color); }
         .main-container { display: flex; gap: 20px; width: 100%; max-width: 1400px; margin: 0 auto; height: calc(100vh - 100px); }
         .panel { background-color: var(--surface-color); border-radius: 16px; border: 1px solid var(--border-color); padding: var(--card-padding); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: background-color 0.3s, border-color 0.3s; display: flex; flex-direction: column; }
         .input-panel, .output-panel { flex: 1; overflow-y: auto; }
@@ -33,10 +30,42 @@
         #result-container { line-height: 1.7; }
         #result-container h2 { font-size: 20px; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 25px; }
         .sources-container { margin-top: 20px; font-size: 14px; }
-        .sources-container a { color: var(--text-secondary-color); text-decoration: none; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sources-container a { color: var(--text-secondary-color); text-decoration: none; }
         .sources-container a:hover { text-decoration: underline; }
         .spinner { border: 3px solid rgba(255,255,255,0.2); width: 18px; height: 18px; border-radius: 50%; border-left-color: #fff; animation: spin 1s ease infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .citation-link { color: var(--primary-color); text-decoration: none; font-weight: bold; vertical-align: super; font-size: 0.8em; margin: 0 2px; }
+        .citation-link:hover { text-decoration: underline; }
+        .source-item { padding: 2px 0; }
+
+        /* --- 【全新UI样式】语言切换按钮组 --- */
+        .lang-toggle {
+            display: flex;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: var(--surface-color);
+        }
+        .lang-toggle button {
+            background: none;
+            border: none;
+            color: var(--text-secondary-color);
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .lang-toggle button:not(:last-child) {
+            border-right: 1px solid var(--border-color);
+        }
+        .lang-toggle button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .lang-toggle button:hover:not(.active) {
+            color: var(--text-color);
+        }
     </style>
 </head>
 <body>
@@ -44,9 +73,13 @@
     <header class="header">
         <div class="logo" id="logo">🔬 职场透镜</div>
         <div class="controls">
-            <button class="control-button theme-switcher" id="theme-switcher">☀️</button>
-            <button class="control-button" id="lang-switcher-zh">切換到繁體</button>
-            <button class="control-button" id="lang-switcher-main">Switch to English</button>
+            <button class="theme-switcher" id="theme-switcher">☀️</button>
+            <!-- 【全新HTML结构】语言切换按钮组 -->
+            <div class="lang-toggle" id="lang-toggle">
+                <button data-lang="zh-CN">简</button>
+                <button data-lang="zh-TW">繁</button>
+                <button data-lang="en">EN</button>
+            </div>
         </div>
     </header>
 
@@ -55,17 +88,14 @@
             <div>
                 <h1 data-key="title">输入信息</h1>
                 <p class="subtitle" data-key="subtitle">AI将自动搜索并分析该公司</p>
-                
                 <div class="form-group">
                     <label for="company-name" data-key="company_name_label">公司名称</label>
                     <input type="text" id="company-name" data-key-placeholder="company_name_placeholder">
                 </div>
-
                 <div class="form-group">
                     <label for="job-title" data-key="job_title_label">职位名称 (可选)</label>
                     <input type="text" id="job-title" data-key-placeholder="job_title_placeholder">
                 </div>
-
                 <div class="form-group">
                     <label for="resume-text" data-key="resume_label">我的简历 / 个人简介 (可选)</label>
                     <textarea id="resume-text" rows="6" data-key-placeholder="resume_placeholder"></textarea>
@@ -86,7 +116,7 @@
     </main>
 
     <script>
-        // --- 1. 元素获取 ---
+        // --- 1. 元素获取 (已更新) ---
         const companyNameInput = document.getElementById('company-name');
         const jobTitleInput = document.getElementById('job-title');
         const resumeTextInput = document.getElementById('resume-text');
@@ -95,82 +125,27 @@
         const sourcesContainer = document.getElementById('sources-container');
         const themeSwitcher = document.getElementById('theme-switcher');
         const logo = document.getElementById('logo');
-        const langSwitcherMain = document.getElementById('lang-switcher-main');
-        const langSwitcherZh = document.getElementById('lang-switcher-zh');
+        const langToggle = document.getElementById('lang-toggle'); // 新增
 
-        // --- 2. API 配置 ---
+        // --- 2. API 配置 (无变化) ---
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
-        // --- 3. 国际化 (i18n) 配置 ---
+        // --- 3. 国际化 (i18n) 配置 (已简化) ---
         const translations = {
-            'zh-CN': {
-                logo_text: '🔬 职场透镜',
-                title: '输入信息',
-                subtitle: 'AI将自动搜索并分析该公司',
-                company_name_label: '公司名称',
-                company_name_placeholder: '例如：西安大略大学', // 【重要更新】
-                job_title_label: '职位名称 (可选)',
-                job_title_placeholder: '例如：软件工程师, 市场经理', // 【重要更新】
-                resume_label: '我的简历 / 个人简介 (可选)',
-                resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...',
-                button_text: '开始分析',
-                button_loading_text: '搜索分析中...',
-                result_placeholder_title: '分析报告',
-                result_placeholder_text: '（请输入公司名后点击分析）',
-                sources_title: '信息来源:',
-                lang_switcher_main_text: 'Switch to English',
-                lang_switcher_zh_text: '切換到繁體',
-            },
-            'zh-TW': {
-                logo_text: '🔬 職場透鏡',
-                title: '輸入資訊',
-                subtitle: 'AI將自動搜索並分析該公司',
-                company_name_label: '公司名稱',
-                company_name_placeholder: '例如：西安大略大學', // 【重要更新】
-                job_title_label: '職位名稱 (可選)',
-                job_title_placeholder: '例如：軟體工程師, 市場經理', // 【重要更新】
-                resume_label: '我的履歷 / 個人簡介 (可選)',
-                resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...',
-                button_text: '開始分析',
-                button_loading_text: '搜索分析中...',
-                result_placeholder_title: '分析報告',
-                result_placeholder_text: '（請輸入公司名後點擊分析）',
-                sources_title: '資訊來源:',
-                lang_switcher_main_text: 'Switch to English',
-                lang_switcher_zh_text: '切换到简体',
-            },
-            'en': {
-                logo_text: '🔬 Project Lens',
-                title: 'Input Information',
-                subtitle: 'AI will automatically search and analyze the company',
-                company_name_label: 'Company Name',
-                company_name_placeholder: 'e.g., Western University',
-                job_title_label: 'Job Title (Optional)',
-                job_title_placeholder: 'e.g., Software Engineer, Marketing Manager',
-                resume_label: 'My Resume / Bio (Optional)',
-                resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...',
-                button_text: 'Analyze',
-                button_loading_text: 'Searching & Analyzing...',
-                result_placeholder_title: 'Analysis Report',
-                result_placeholder_text: '(Enter a company name and click Analyze)',
-                sources_title: 'Information Sources:',
-                lang_switcher_main_text: '切换到中文',
-            }
+            'zh-CN': { logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析该公司', company_name_label: '公司名称', company_name_placeholder: '例如：小米', job_title_label: '职位名称 (可选)', job_title_placeholder: '例如：软件工程师, 市场经理', resume_label: '我的简历 / 个人简介 (可选)', resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...', button_text: '开始分析', button_loading_text: '搜索分析中...', result_placeholder_title: '分析报告', result_placeholder_text: '（请输入公司名后点击分析）', sources_title: '引用来源:' },
+            'zh-TW': { logo_text: '🔬 職場透鏡', title: '輸入資訊', subtitle: 'AI將自動搜索並分析該公司', company_name_label: '公司名稱', company_name_placeholder: '例如：小米', job_title_label: '職位名稱 (可選)', job_title_placeholder: '例如：軟體工程師, 市場經理', resume_label: '我的履歷 / 個人簡介 (可選)', resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...', button_text: '開始分析', button_loading_text: '搜索分析中...', result_placeholder_title: '分析報告', result_placeholder_text: '（請輸入公司名後點擊分析）', sources_title: '資訊來源:' },
+            'en':    { logo_text: '🔬 Project Lens', title: 'Input Information', subtitle: 'AI will automatically search and analyze the company', company_name_label: 'Company Name', company_name_placeholder: 'e.g., Xiaomi', job_title_label: 'Job Title (Optional)', job_title_placeholder: 'e.g., Software Engineer, Marketing Manager', resume_label: 'My Resume / Bio (Optional)', resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...', button_text: 'Analyze', button_loading_text: 'Searching & Analyzing...', result_placeholder_title: 'Analysis Report', result_placeholder_text: '(Enter a company name and click Analyze)', sources_title: 'References:' }
         };
 
-        // --- 4. 核心逻辑 ---
+        // --- 4. 核心逻辑 (已升级) ---
         let currentLang = 'zh-CN';
-        let lastUsedChineseLang = 'zh-CN';
 
         function setLanguage(langCode) {
             currentLang = langCode;
             document.documentElement.lang = langCode;
             const t = translations[langCode];
-            logo.textContent = t.logo_text;
-            langSwitcherMain.textContent = t.lang_switcher_main_text;
-            langSwitcherZh.textContent = t.lang_switcher_zh_text;
-            langSwitcherZh.classList.toggle('hidden', langCode === 'en');
-            if (langCode !== 'en') lastUsedChineseLang = langCode;
+            
+            // 更新所有文本
             document.querySelectorAll('[data-key]').forEach(elem => {
                 const key = elem.getAttribute('data-key');
                 if (t[key]) elem.textContent = t[key];
@@ -178,6 +153,12 @@
             document.querySelectorAll('[data-key-placeholder]').forEach(elem => {
                 const key = elem.getAttribute('data-key-placeholder');
                 if (t[key]) elem.placeholder = t[key];
+            });
+            logo.textContent = t.logo_text;
+
+            // 更新按钮组的激活状态
+            langToggle.querySelectorAll('button').forEach(button => {
+                button.classList.toggle('active', button.dataset.lang === langCode);
             });
         }
 
@@ -190,57 +171,57 @@
         analyzeButton.addEventListener('click', async function() {
             const t = translations[currentLang];
             const buttonTextSpan = analyzeButton.querySelector('span');
-
             buttonTextSpan.textContent = t.button_loading_text;
             analyzeButton.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
             analyzeButton.disabled = true;
-            resultContainer.innerHTML = `<h2 data-key="result_placeholder_title">${t.result_placeholder_title}</h2><p>${t.button_loading_text}</p>`;
+            resultContainer.innerHTML = `<h2>${t.result_placeholder_title}</h2><p>${t.button_loading_text}</p>`;
             sourcesContainer.innerHTML = '';
 
-            const data = {
-                companyName: companyNameInput.value,
-                jobTitle: jobTitleInput.value,
-                resumeText: resumeTextInput.value,
-                language: currentLang
-            };
+            const data = { companyName: companyNameInput.value, jobTitle: jobTitleInput.value, resumeText: resumeTextInput.value, language: currentLang };
 
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
+                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const result = await response.json();
                 if (response.ok) {
-                    resultContainer.innerHTML = DOMPurify.sanitize(marked.parse(result.analysis));
+                    let analysisHtml = marked.parse(result.analysis || '');
+                    analysisHtml = analysisHtml.replace(/\[(\d+)\]/g, (match, number) => `<a href="#source-${number}" class="citation-link">${match}</a>`);
+                    resultContainer.innerHTML = DOMPurify.sanitize(analysisHtml);
+                    
                     if (result.sources && result.sources.length > 0) {
                         let sourcesHTML = `<h2>${t.sources_title}</h2>`;
                         result.sources.forEach(source => {
-                            sourcesHTML += `<a href="${source.link}" target="_blank" rel="noopener noreferrer">${source.title}</a>`;
+                            sourcesHTML += `<div class="source-item" id="source-${source.id}">[${source.id}] <a href="${source.link}" target="_blank" rel="noopener noreferrer">${source.title}</a></div>`;
                         });
-                        sourcesContainer.innerHTML = sourcesHTML;
+                        sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_ATTR: ['id']});
                     }
                 } else {
-                    resultContainer.textContent = (t.error_prefix || 'Error: ') + result.error;
+                    resultContainer.textContent = `Error: ${result.error}`;
                 }
             } catch (error) {
-                resultContainer.textContent = t.connection_error || 'Connection error.';
+                resultContainer.textContent = 'Connection error.';
             } finally {
                 buttonTextSpan.textContent = t.button_text;
-                if(analyzeButton.querySelector('.spinner')) {
-                    analyzeButton.querySelector('.spinner').remove();
-                }
+                if(analyzeButton.querySelector('.spinner')) analyzeButton.querySelector('.spinner').remove();
                 analyzeButton.disabled = false;
             }
         });
 
-        // --- 5. 初始化 ---
-        langSwitcherMain.addEventListener('click', () => setLanguage(currentLang === 'en' ? lastUsedChineseLang : 'en'));
-        langSwitcherZh.addEventListener('click', () => setLanguage(currentLang === 'zh-CN' ? 'zh-TW' : 'zh-CN'));
+        // --- 5. 初始化 (已更新) ---
         themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
         
+        // 新的语言切换事件监听
+        langToggle.addEventListener('click', (event) => {
+            if (event.target.tagName === 'BUTTON') {
+                const langCode = event.target.dataset.lang;
+                if (langCode && langCode !== currentLang) {
+                    setLanguage(langCode);
+                }
+            }
+        });
+        
+        // 页面加载时初始化
         setTheme(localStorage.getItem('theme') || 'dark');
-        setLanguage('zh-CN');
+        setLanguage('zh-CN'); // 默认语言
     </script>
 </body>
 </html>
