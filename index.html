@@ -131,7 +131,7 @@
         // --- 2. API 配置 (无变化) ---
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
-        // --- 3. 国际化 (i18n) 配置 (无变化) ---
+        // --- 3. 国际化 (i18n) 配置 (已更新) ---
         const translations = {
             'zh-CN': { 
                 logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析该公司', 
@@ -141,6 +141,7 @@
                 button_text: '开始分析', button_loading_text: '搜索分析中...', 
                 result_placeholder_title: '分析报告', result_placeholder_text: '（请输入公司名后点击分析）', 
                 sources_title: '引用来源:',
+                // 【核心改动】新增中英文错误提示
                 rate_limit_exceeded: "开拓者，您今日的免费分析额度已用尽！🚀\n\nProject Lens 每天为所有用户提供10次免费分析。\n如果您是需要进行大量研究的‘超级用户’，可以考虑升级到 Pro 版本，或通过‘请我喝杯咖啡☕️’来立即重置额度！",
                 connection_error: "发生连接错误，请检查网络或联系开发者。",
                 support_text: "请开发者喝杯咖啡"
@@ -215,17 +216,11 @@
 
                 if (response.ok) {
                     let analysisHtml = marked.parse(result.analysis || '');
-                    
-                    // 【核心改动】第一步：先处理常规的 [1] 格式
                     analysisHtml = analysisHtml.replace(/\[(\d+)\]/g, (match, number) => `<a href="#source-${number}" class="citation-link">${match}</a>`);
-                    
-                    // 【核心改动】第二步：再处理特殊的 [Source ID: 1, 2, ...] 格式
                     analysisHtml = analysisHtml.replace(/\[Source ID: ([\d, ]+)\]/g, (match, numbersString) => {
-                        const numbers = numbersString.split(/,\s*/); // 用正则表达式分割数字字符串
-                        // 将每个数字都转换成一个链接，然后用逗号和空格连接起来
+                        const numbers = numbersString.split(/,\s*/);
                         return numbers.map(number => `<a href="#source-${number}" class="citation-link">[${number}]</a>`).join(', ');
                     });
-
                     resultContainer.innerHTML = DOMPurify.sanitize(analysisHtml);
                     
                     if (result.sources && result.sources.length > 0) {
@@ -240,6 +235,7 @@
                         sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_ATTR: ['id'], ADD_TAGS: ['svg', 'path']});
                     }
                 } else {
+                    // 【核心改动】在这里处理限流错误
                     if (result.error === 'rate_limit_exceeded') {
                         resultContainer.innerHTML = `<h2>${t.result_placeholder_title}</h2><p>${t.rate_limit_exceeded}</p>`;
                     } else {
@@ -266,4 +262,3 @@
     </script>
 </body>
 </html>
-
