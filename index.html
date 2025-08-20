@@ -131,7 +131,7 @@
         // --- 2. API 配置 (无变化) ---
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
-        // --- 3. 国际化 (i18n) 配置 (已更新) ---
+        // --- 3. 国际化 (i18n) 配置 (无变化) ---
         const translations = {
             'zh-CN': { 
                 logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析该公司', 
@@ -167,7 +167,7 @@
                 sources_title: 'References:',
                 rate_limit_exceeded: "Explorer, you have used up your free analysis quota for today! 🚀\n\nProject Lens provides 10 free analyses per day for all users.\nIf you are a 'power user' who needs to conduct a lot of research, consider upgrading to the Pro version or 'Buy me a coffee ☕️' to reset your quota immediately!",
                 connection_error: "Connection error. Please check your network or contact the developer.",
-                support_text: "Buy the developer a coffee" // 【核心改动】
+                support_text: "Buy the developer a coffee"
             }
         };
         
@@ -215,7 +215,17 @@
 
                 if (response.ok) {
                     let analysisHtml = marked.parse(result.analysis || '');
+                    
+                    // 【核心改动】第一步：先处理常规的 [1] 格式
                     analysisHtml = analysisHtml.replace(/\[(\d+)\]/g, (match, number) => `<a href="#source-${number}" class="citation-link">${match}</a>`);
+                    
+                    // 【核心改动】第二步：再处理特殊的 [Source ID: 1, 2, ...] 格式
+                    analysisHtml = analysisHtml.replace(/\[Source ID: ([\d, ]+)\]/g, (match, numbersString) => {
+                        const numbers = numbersString.split(/,\s*/); // 用正则表达式分割数字字符串
+                        // 将每个数字都转换成一个链接，然后用逗号和空格连接起来
+                        return numbers.map(number => `<a href="#source-${number}" class="citation-link">[${number}]</a>`).join(', ');
+                    });
+
                     resultContainer.innerHTML = DOMPurify.sanitize(analysisHtml);
                     
                     if (result.sources && result.sources.length > 0) {
@@ -248,7 +258,7 @@
             }
         });
 
-        // --- 5. 初始化 ---
+        // --- 5. 初始化 (无变化) ---
         themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
         langToggle.addEventListener('click', (event) => { if (event.target.tagName === 'BUTTON') { const langCode = event.target.dataset.lang; if (langCode && langCode !== currentLang) { setLanguage(langCode); } } });
         setTheme(localStorage.getItem('theme') || 'dark');
