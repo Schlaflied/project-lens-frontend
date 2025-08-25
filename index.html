@@ -27,8 +27,10 @@
         textarea { resize: vertical; }
         .analyze-button { width: 100%; padding: 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin-top: auto; }
         .analyze-button:disabled { background: #555; cursor: not-allowed; }
-        #result-container { line-height: 1.7; } /* 移除了 white-space: pre-wrap; 以便HTML能正常渲染 */
+        #result-container { line-height: 1.7; }
         #result-container h2 { font-size: 20px; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 25px; }
+        /* Welcome message specific style */
+        #result-container .welcome-message h2 { border-bottom: none; margin-top: 0; }
         .sources-container { margin-top: 20px; font-size: 14px; }
         .sources-container a { color: var(--text-secondary-color); text-decoration: none; }
         .sources-container a:hover { text-decoration: underline; }
@@ -108,10 +110,15 @@
         </section>
 
         <section class="panel output-panel">
+            <!-- *** MODIFICATION START: Welcome Message *** -->
             <div id="result-container">
-                <h2 data-key="result_placeholder_title">分析报告</h2>
-                <p data-key="result_placeholder_text" style="color: var(--text-secondary-color);">（请输入公司名后点击分析）</p>
+                <div class="welcome-message">
+                    <h2 data-key="welcome_title">欢迎来到Project Lens！</h2>
+                    <p data-key="welcome_p1" style="color: var(--text-secondary-color); margin-top: 15px;"></p>
+                    <p data-key="welcome_p2" style="color: var(--text-secondary-color); margin-top: 15px;"></p>
+                </div>
             </div>
+            <!-- *** MODIFICATION END *** -->
             <div class="sources-container" id="sources-container"></div>
         </section>
     </main>
@@ -132,7 +139,7 @@
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
         // --- 3. 国际化 (i18n) 配置 ---
-        // 【核心改动】为网页版也加上加载动画的文字
+        // *** MODIFICATION: Updated translations for the welcome message ***
         const translations = {
             'zh-CN': { 
                 logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析该公司', 
@@ -140,11 +147,13 @@
                 job_title_label: '职位名称 (可选)', job_title_placeholder: '例如：软件工程师, 市场经理', 
                 resume_label: '我的简历 / 个人简介 (可选)', resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...', 
                 button_text: '开始分析', button_loading_text: '分析中...', 
-                result_placeholder_title: '分析报告', result_placeholder_text: '（请输入公司名后点击分析）', 
                 sources_title: '引用来源:',
                 rate_limit_exceeded: "开拓者，您今日的免费分析额度已用尽！🚀\n\nProject Lens 每天为所有用户提供10次免费分析。\n如果您是需要进行大量研究的‘超级用户’，可以考虑升级到 Pro 版本，或通过‘请我喝杯咖啡☕️’来立即重置额度！",
                 connection_error: "发生连接错误，请检查网络或联系开发者。",
                 support_text: "请开发者喝杯咖啡",
+                welcome_title: "欢迎来到 Project Lens！",
+                welcome_p1: "我能帮你一键分析公司文化，避免求职踩坑。",
+                welcome_p2: "请在左侧输入公司名，开始你的第一次探索吧！为了获得最精准的结果，请输入公司的官方全称，或在大学名后加上校区/省份 (e.g., University of Western Ontario / UWO)。",
                 loading_statuses: [
                     "正在连接AI大脑...",
                     "正在全网搜索公司信息...",
@@ -154,16 +163,18 @@
                 ]
             },
             'zh-TW': { 
-                logo_text: '🔬 職場透鏡', title: '输入资讯', subtitle: 'AI將自動搜索並分析該公司', 
+                logo_text: '🔬 職場透鏡', title: '输入資訊', subtitle: 'AI將自動搜索並分析該公司', 
                 company_name_label: '公司名稱', company_name_placeholder: '例如：西安大略大學', 
                 job_title_label: '職位名稱 (可選)', job_title_placeholder: '例如：軟體工程師, 市場經理', 
                 resume_label: '我的履歷 / 個人簡介 (可選)', resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...', 
                 button_text: '開始分析', button_loading_text: '分析中...', 
-                result_placeholder_title: '分析報告', result_placeholder_text: '（請輸入公司名後點擊分析）', 
                 sources_title: '資訊來源:',
                 rate_limit_exceeded: "開拓者，您今日的免費分析額度已用盡！🚀\n\nProject Lens 每天為所有用戶提供10次免費分析。\n如果您是需要進行大量研究的「超級用戶」，可以考慮升級到 Pro 版本，或通過「請我喝杯咖啡☕️」來立即重置額度！",
                 connection_error: "發生連接錯誤，請檢查網路或聯絡開發者。",
                 support_text: "請開發者喝杯咖啡",
+                welcome_title: "歡迎來到 Project Lens！",
+                welcome_p1: "我能幫你一鍵分析公司文化，避免求職踩坑。",
+                welcome_p2: "請在左側輸入公司名，開始你的第一次探索吧！為了獲得最精準的結果，請輸入公司的官方全稱，或在大學名後加上校區/省份 (e.g., University of Western Ontario / UWO)。",
                  loading_statuses: [
                     "正在連接AI大腦...",
                     "正在全網搜尋公司資訊...",
@@ -178,11 +189,13 @@
                 job_title_label: 'Job Title (Optional)', job_title_placeholder: 'e.g., Software Engineer, Marketing Manager', 
                 resume_label: 'My Resume / Bio (Optional)', resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...', 
                 button_text: 'Analyze', button_loading_text: 'Analyzing...', 
-                result_placeholder_title: 'Analysis Report', result_placeholder_text: '(Enter a company name and click Analyze)', 
                 sources_title: 'References:',
                 rate_limit_exceeded: "Explorer, you have used up your free analysis quota for today! 🚀\n\nProject Lens provides 10 free analyses per day for all users.\nIf you are a 'power user' who needs to conduct a lot of research, consider upgrading to the Pro version or 'Buy me a coffee ☕️' to reset your quota immediately!",
                 connection_error: "Connection error. Please check your network or contact the developer.",
                 support_text: "Buy the developer a coffee",
+                welcome_title: "Welcome to Project Lens!",
+                welcome_p1: "I can help you analyze company culture with one click to avoid job-hunting pitfalls.",
+                welcome_p2: "Please enter a company name on the left to start your first exploration! For the most accurate results, please enter the company's official full name, or add the campus/province after a university's name (e.g., University of Western Ontario / UWO).",
                 loading_statuses: [
                     "Connecting to the AI brain...",
                     "Searching for company info across the web...",
@@ -202,7 +215,7 @@
 
         // --- 4. 核心逻辑 ---
         let currentLang = 'zh-CN';
-        let loadingInterval = null; // 【新增】加载动画的定时器变量
+        let loadingInterval = null;
 
         function setLanguage(langCode) {
             currentLang = langCode;
@@ -220,45 +233,40 @@
             localStorage.setItem('theme', theme);
         }
 
-        // 【核心改动】重写 analyzeButton 的事件监听器
         analyzeButton.addEventListener('click', async function() {
             const t = translations[currentLang];
             const buttonTextSpan = analyzeButton.querySelector('span');
             
-            // 1. 禁用按钮并显示加载状态
             buttonTextSpan.textContent = t.button_loading_text;
             analyzeButton.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
             analyzeButton.disabled = true;
             sourcesContainer.innerHTML = '';
 
-            // 2. 启动加载动画
             let statusIndex = 0;
             const loadingStatuses = t.loading_statuses;
-            resultContainer.innerHTML = `<h2>${t.result_placeholder_title}</h2><p>${loadingStatuses[statusIndex]}</p>`;
+            // Display initial loading status immediately
+            resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex]}</p>`;
             statusIndex++;
             
             loadingInterval = setInterval(() => {
                 if (statusIndex < loadingStatuses.length) {
-                    resultContainer.innerHTML = `<h2>${t.result_placeholder_title}</h2><p>${loadingStatuses[statusIndex]}</p>`;
+                    resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex]}</p>`;
                     statusIndex++;
                 } else {
                     clearInterval(loadingInterval);
                 }
             }, 2500);
 
-            // 3. 发送API请求
             const data = { companyName: companyNameInput.value, jobTitle: jobTitleInput.value, resumeText: resumeTextInput.value, language: currentLang };
 
             try {
                 const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const result = await response.json();
 
-                // 【重要】收到结果后，立刻停止动画
                 if (loadingInterval) clearInterval(loadingInterval);
 
                 if (response.ok) {
                     let analysisHtml = marked.parse(result.analysis || '');
-                    // 处理引用链接
                     analysisHtml = analysisHtml.replace(/\[(\d+)\]/g, (match, number) => `<a href="#source-${number}" class="citation-link">${match}</a>`);
                     resultContainer.innerHTML = DOMPurify.sanitize(analysisHtml);
                     
@@ -274,9 +282,8 @@
                         sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_ATTR: ['id'], ADD_TAGS: ['svg', 'path']});
                     }
                 } else {
-                    if (result.error === 'rate_limit_exceeded') {
-                        // 使用 pre-wrap 来保留换行符
-                        resultContainer.innerHTML = `<h2>${t.result_placeholder_title}</h2><p style="white-space: pre-wrap;">${t.rate_limit_exceeded}</p>`;
+                     if (response.status === 429 || result.error === 'rate_limit_exceeded') {
+                        resultContainer.innerHTML = `<h2 style="color: var(--primary-color);">Quota Reached</h2><p style="white-space: pre-wrap;">${t.rate_limit_exceeded}</p>`;
                     } else {
                         resultContainer.innerHTML = `<h2>Error</h2><p>${result.error || 'Unknown error'}</p>`;
                     }
@@ -303,4 +310,5 @@
     </script>
 </body>
 </html>
+
 
