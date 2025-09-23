@@ -110,7 +110,6 @@
         </section>
 
         <section class="panel output-panel">
-            <!-- *** MODIFICATION START: Welcome Message *** -->
             <div id="result-container">
                 <div class="welcome-message">
                     <h2 data-key="welcome_title">欢迎来到Project Lens！</h2>
@@ -118,7 +117,6 @@
                     <p data-key="welcome_p2" style="color: var(--text-secondary-color); margin-top: 15px;"></p>
                 </div>
             </div>
-            <!-- *** MODIFICATION END *** -->
             <div class="sources-container" id="sources-container"></div>
         </section>
     </main>
@@ -139,7 +137,6 @@
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
         // --- 3. 国际化 (i18n) 配置 ---
-        // *** MODIFICATION: Updated translations for the welcome message ***
         const translations = {
             'zh-CN': { 
                 logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析该公司', 
@@ -244,7 +241,6 @@
 
             let statusIndex = 0;
             const loadingStatuses = t.loading_statuses;
-            // Display initial loading status immediately
             resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex]}</p>`;
             statusIndex++;
             
@@ -267,7 +263,21 @@
 
                 if (response.ok) {
                     let analysisHtml = marked.parse(result.analysis || '');
+                    
+                    // 将 [1] 格式的引用转换为链接
                     analysisHtml = analysisHtml.replace(/\[(\d+)\]/g, (match, number) => `<a href="#source-${number}" class="citation-link">${match}</a>`);
+                    
+                    // *** 修改开始：新增代码以处理 (Source ID: ...) 格式 ***
+                    analysisHtml = analysisHtml.replace(/\(Source ID: ([\d, ]+)\)/g, (match, numbersString) => {
+                        // 将 "1, 2, 3" 这样的字符串分割成数字数组
+                        const numbers = numbersString.split(',').map(s => s.trim()).filter(s => s);
+                        // 为每个数字创建一个链接
+                        const links = numbers.map(number => `<a href="#source-${number}" class="citation-link">[${number}]</a>`);
+                        // 将链接用逗号和空格重新组合
+                        return links.join(', ');
+                    });
+                    // *** 修改结束 ***
+
                     resultContainer.innerHTML = DOMPurify.sanitize(analysisHtml);
                     
                     if (result.sources && result.sources.length > 0) {
