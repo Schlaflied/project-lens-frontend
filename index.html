@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v12.0</title>
+    <title>职场透镜 (Project Lens) v12.2 - Live API</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -36,7 +36,6 @@
         .analyze-button { width: 100%; padding: 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin-top: auto; }
         .analyze-button:disabled { background: #555; cursor: not-allowed; }
         #result-container { line-height: 1.7; }
-        .preview-notice { background-color: rgba(155, 89, 182, 0.1); border: 1px solid var(--primary-color); color: var(--primary-color); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 500; }
         .tooltip-container { position: relative; display: inline-flex; margin-left: 8px; cursor: help; }
         .tooltip-icon { font-family: serif; font-size: 12px; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--text-secondary-color); color: var(--text-secondary-color); align-items: center; justify-content: center; font-weight: bold; font-style: italic; display: inline-flex; }
         .tooltip-text { visibility: hidden; width: 250px; background-color: #2c2c2c; color: var(--text-color); text-align: left; border-radius: 8px; padding: 12px; position: absolute; z-index: 1; bottom: 140%; left: 50%; margin-left: -125px; opacity: 0; transition: opacity 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.25); border: 1px solid #444; font-size: 14px; line-height: 1.5; font-weight: normal; font-style: normal; }
@@ -58,6 +57,7 @@
         .source-item { display: flex; align-items: center; padding: 4px 0; font-size: 14px; color: var(--text-secondary-color); }
         .source-item a { color: var(--text-secondary-color); text-decoration: none; margin-left: 8px; }
         .source-item a:hover { text-decoration: underline; color: var(--text-color); }
+        .source-icon { width: 16px; height: 16px; margin-right: 8px; flex-shrink: 0; color: var(--text-secondary-color); }
         .lang-toggle, .coffee-button, .theme-switcher { transition: all 0.2s ease-in-out; }
         .lang-toggle { display: flex; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; background-color: var(--surface-color); }
         .lang-toggle button { background: none; border: none; color: var(--text-secondary-color); padding: 8px 16px; cursor: pointer; font-size: 15px; font-weight: 500; }
@@ -69,12 +69,10 @@
         .theme-switcher:hover { color: var(--text-color); background-color: var(--surface-color); }
         .spinner { border: 3px solid rgba(255,255,255,0.2); width: 18px; height: 18px; border-radius: 50%; border-left-color: #fff; animation: spin 1s ease infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        /* New styles for aspect tags */
         .aspect-tags { display: flex; flex-wrap: wrap; gap: 10px; }
         .aspect-tags input[type="checkbox"] { display: none; }
         .aspect-tags label { display: inline-block; padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 20px; cursor: pointer; transition: all 0.2s ease-in-out; font-size: 14px; margin-bottom: 0; }
         .aspect-tags input[type="checkbox"]:checked + label { background-color: var(--primary-color); border-color: var(--primary-color); color: white; font-weight: bold; }
-
     </style>
 </head>
 <body>
@@ -152,12 +150,19 @@
         // --- 2. API 配置 ---
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
-        // --- 3. 国际化 (i18n) 与静态内容配置 ---
+        // --- 3. 图标定义 (无变化) ---
+        const ICONS = {
+            linkedin: `<svg class="source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/></svg>`,
+            glassdoor: `<svg class="source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.185 1.185A1.5 1.5 0 0 1 2.57.293l10.854 10.854a.5.5 0 0 1 0 .708L11.146 14a.5.5 0 0 1-.708 0L.293 2.854A1.5 1.5 0 0 1 1.185 1.185zM14.815 1.185a1.5 1.5 0 0 0-2.122 0L.854 13.146a.5.5 0 0 0 0 .708L2.854 15.707a.5.5 0 0 0 .708 0L15.707 3.565a1.5 1.5 0 0 0 0-2.122l-.892-.892z"/></svg>`,
+            indeed: `<svg class="source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.555 5.582a.363.363 0 0 0-.363.363v4.062a.363.363 0 0 0 .363.363h.363a.363.363 0 0 0 .363-.363V5.945a.363.363 0 0 0-.363-.363h-.363zM10.31 5.582a.363.363 0 0 0-.363.363v4.062a.363.363 0 0 0 .363.363h.363a.363.363 0 0 0 .363-.363V5.945a.363.363 0 0 0-.363-.363h-.363zM8.36 5.582a.363.363 0 0 0-.363.363v4.062a.363.363 0 0 0 .363.363h.363a.363.363 0 0 0 .363-.363V5.945a.363.363 0 0 0-.363-.363h-.363zM5.945 5.582a.363.363 0 0 0-.363.363v4.062a.363.363 0 0 0 .363.363h.363a.363.363 0 0 0 .363-.363V5.945a.363.363 0 0 0-.363-.363h-.363zM15.363 4.091A1.91 1.91 0 0 0 13.455 2.182h-10.91A1.91 1.91 0 0 0 .636 4.091v7.818A1.91 1.91 0 0 0 2.545 13.818h10.91a1.91 1.91 0 0 0 1.909-1.909V4.091zM2.909 5.227a1.136 1.136 0 1 1 0 2.273 1.136 1.136 0 0 1 0-2.273z"/></svg>`,
+            default: `<svg class="source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/></svg>`
+        };
+
+        // --- 4. 国际化 (i18n) 与静态内容配置 (无变化) ---
         let currentLang = 'zh-CN';
         const translations = {
             'zh-CN': { 
-                // --- UI Text ---
-                logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将模拟分析该机构的招聘与文化',
+                logo_text: '🔬 职场透镜', title: '输入信息', subtitle: 'AI将自动搜索并分析公司',
                 smart_paste_label: '粘贴职位信息或公司名', smart_paste_placeholder: '在此处粘贴职位描述(JD)或公司名...',
                 aspects_label: '选择你关注的方面',
                 aspect_wlb: '工作与生活平衡', aspect_reputation: '公司声誉', aspect_growth: '成长机会',
@@ -167,63 +172,30 @@
                 resume_label: '我的简历 / 个人简介 (可选)', resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...',
                 button_text: '开始分析', button_loading_text: '分析中...',
                 support_text: "请开发者喝杯咖啡",
-                preview_notice: '这是一个静态预览，用于展示“防Ghosting”和“风险扫描”等新功能的最终效果。点击下方按钮查看。',
-                welcome_title: "欢迎来到 Project Lens！", welcome_p1: "我能帮你一键分析公司文化，避免求职踩坑。请在左侧输入公司名，开始你的第一次探索吧！",
-                rate_limit_exceeded: "开拓者，您今日的免费分析额度已用尽！🚀\n\nProject Lens 每天为所有用户提供10次免费分析。\n如果您是需要进行大量研究的‘超级用户’，可以考虑升级到 Pro 版本，或通过‘请我喝杯咖啡☕️’来立即重置额度！",
+                welcome_title: "欢迎来到 Project Lens！", welcome_p1: "我能帮你一键分析公司文化，避免求职踩坑。请在左侧输入信息，开始你的第一次探索吧！",
+                rate_limit_exceeded: "开拓者，您今日的免费分析额度已用尽！🚀\n\nProject Lens 每天为所有用户提供5次免费分析。",
                 connection_error: "发生连接错误，请检查网络或联系开发者。",
-                loading_statuses: [
-                    "正在连接AI大脑...", "正在全网搜索公司信息...", "正在阅读相关新闻与评价...",
-                    "正在召唤 Gemini 进行深度分析...", "即将完成，正在生成报告..."
-                ],
-                final_punctuation: '。',
-                // --- Report Content (for preview) ---
+                loading_statuses: ["正在连接AI大脑...", "正在全网搜索公司信息...", "正在阅读相关新闻与评价...", "正在召唤 Gemini 进行深度分析...", "即将完成，正在生成报告..."],
+                report_titles: {
+                    red_flag: '🚨 Red Flag 风险扫描', culture_fit: '📊 文化契合度分析', hiring_experience: '👻 招聘流程与候选人体验分析',
+                    value_match: '💖 价值匹配报告', final_risk: '⚖️ 最终风险评估', sources: '引用来源'
+                },
+                aspects: {
+                    reputation: '公司声誉', management: '管理风格', sustainability: '可持续性', wlb: '工作与生活平衡',
+                    growth: '成长机会', salary: '薪酬水平', overtime: '加班文化', rating: '评级'
+                },
                 definitions: {
                     reputation: '公司声誉是公众、客户、员工和投资者对一个组织的综合看法和评价。',
                     management: '管理风格是指公司各级管理者在领导团队、分配任务、做出决策时所表现出的一贯行为模式。',
-                    hiring: '招聘体验是候选人在从申请到入职（或被拒）的整个招聘过程中，对公司产生的主观感受和总体印象。',
-                    sustainability: '可持续性（Sustainability）是指公司在追求经济利益的同时，如何平衡其对社会和环境的影响，并确保其商业模式能够长期存在。',
-                    wlb: '工作与生活平衡指的是员工能够在职业责任和个人生活之间找到一个健康、可持续的平衡点。',
-                    growth: '成长机会指的是公司为员工提供的学习新技能、承担更多责任、以及在职业生涯中获得晉升的可能性。',
-                    salary: '薪酬水平指的是公司提供的工资、奖金等现金报酬，在同行业、同地区市场中的相对位置。',
+                    sustainability: '可持续性是指公司在追求经济利益的同时，如何平衡其对社会和环境的影响。',
+                    wlb: '工作与生活平衡指的是员工能够在职业责任和个人生活之间找到一个健康的平衡点。',
+                    growth: '成长机会指的是公司为员工提供的学习新技能、承担更多责任、以及获得晉升的可能性。',
+                    salary: '薪酬水平指的是公司提供的工资、奖金等现金报酬在市场中的相对位置。',
                     overtime: '加班文化是指公司对于正常工作时间之外的额外工作的普遍态度和做法。',
-                },
-                report_titles: {
-                    red_flag: '🚨 Red Flag 风险扫描',
-                    culture_fit: '📊 文化契合度分析',
-                    hiring_experience: '👻 招聘流程与候选人体验分析',
-                    value_match: '💖 价值匹配报告',
-                    final_risk: '⚖️ 最终风险评估',
-                    sources: '引用来源 (模拟)'
-                },
-                aspects: {
-                    reputation: '公司声誉', management: '管理风格', sustainability: '可持续性',
-                    wlb: '工作与生活平衡', growth: '成长机会', salary: '薪酬水平', overtime: '加班文化',
-                    rating: '评级'
-                },
-                preview_data: {
-                    red_flag_status_low: '低风险',
-                    red_flag_text: '作为西安大略大学毅伟商学院的一部分，Ivey Publishing 是一个信誉良好的学术出版机构，无诈骗或“皮包公司”风险。<a href="#source-1" class="citation-link">[1]</a>',
-                    analysis_reputation: 'Ivey Publishing 背靠全球顶尖的毅伟商学院，享有极高的学术声誉和品牌价值。其出版的商业案例被世界各地的大学广泛采用，是该领域的权威。<a href="#source-1" class="citation-link">[1]</a><a href="#source-2" class="citation-link">[2]</a>',
-                    analysis_management: '管理风格倾向于传统的学术机构模式，层级结构明确，决策流程较为严谨。工作环境专业，但创新和灵活性可能受限于既定流程。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_sustainability: '作为一家学术机构，Ivey Publishing 在内容上推动对可持续商业实践的讨论。然而，关于其自身运营（如减少碳足迹、使用环保材料等）的公开信息较少。<a href="#source-6" class="citation-link">[6]</a>',
-                    analysis_wlb: '工作节奏在学术出版领域相对稳定，但临近案例发布截止日期时可能会有强度增加。总体评价为平衡尚可。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_growth: '内部晋升机会有限，但该职位能提供宝贵的学术出版经验，为进入更广泛的教育或出版行业铺平道路。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_salary: '薪酬水平符合学术机构非营利部门的标准，可能低于商业出版公司，但福利待遇较为全面。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_overtime: '加班不被视为常态，但在项目高峰期可能需要。通常情况下，加班可以获得调休。<a href="#source-3" class="citation-link">[3]</a>',
-                    hiring_experience_text: "根据多方平台反馈，Ivey Publishing 的招聘流程周期可能较长。<a href='#source-4' class='citation-link'>[4]</a><br><strong>一个显著的负面反馈集中在沟通环节：有相当数量的候选人反映，在完成最终面试后未能收到任何后续通知，经历了被‘Ghosting’的情况。</strong><a href='#source-5' class='citation-link'>[5]</a> 这表明其候选人关系管理方面存在改进空间。",
-                    value_match_score: 88,
-                    value_match_text: '您的人力资源和教育学双重背景与学术出版领域高度契合。您对人才发展和跨文化沟通的理解，对于处理涉及全球学者和学生的案例出版物是一个明显的优势。<a href="#source-1" class="citation-link">[1]</a>',
-                    final_risk_rating: '低-中等风险',
-                    final_risk_text: '机构本身信誉极高（低风险），工作稳定。然而，其招聘流程中反复出现的沟通不畅和‘Ghosting’问题构成了体验上的中等风险，可能对求职者的积极性与时间投入造成负面影响。<a href="#source-4" class="citation-link">[4]</a><a href="#source-5" class="citation-link">[5]</a>',
-                    sources: [
-                        { id: 1, title: 'Ivey Business School - Official Website', link: '#' }, { id: 2, title: 'Harvard Business Review - "The Impact of Ivey Cases"', link: '#' },
-                        { id: 3, title: 'Glassdoor - "Working at Ivey Publishing - Employee Reviews"', link: '#' }, { id: 4, title: 'Indeed - "Ivey Publishing Interview Process Questions"', link: '#' },
-                        { id: 5, title: 'Reddit (r/UWO) - Thread: "Anyone interviewed with Ivey Publishing?"', link: '#' }, { id: 6, title: 'Ivey Publishing - 年度社会责任报告', link: '#' }
-                    ]
                 }
             },
             'zh-TW': {
-                logo_text: '🔬 職場透鏡', title: '輸入資訊', subtitle: 'AI將模擬分析該機構的招聘與文化',
+                logo_text: '🔬 職場透鏡', title: '輸入資訊', subtitle: 'AI將自動搜索並分析公司',
                 smart_paste_label: '貼上職位資訊或公司名', smart_paste_placeholder: '在此處貼上職位描述(JD)或公司名...',
                 aspects_label: '選擇您關注的方面',
                 aspect_wlb: '工作與生活平衡', aspect_reputation: '公司聲譽', aspect_growth: '成長機會',
@@ -233,62 +205,30 @@
                 resume_label: '我的履歷 / 個人簡介 (可選)', resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...',
                 button_text: '開始分析', button_loading_text: '分析中...',
                 support_text: "請開發者喝杯咖啡",
-                preview_notice: '這是一個靜態預覽，用於展示“防Ghosting”和“風險掃描”等新功能的最終效果。點擊下方按鈕查看。',
-                welcome_title: "歡迎來到 Project Lens！", welcome_p1: "我能幫你一鍵分析公司文化，避免求職踩坑。請在左側輸入公司名，開始你的第一次探索吧！",
-                rate_limit_exceeded: "開拓者，您今日的免費分析額度已用盡！🚀\n\nProject Lens 每天為所有用戶提供10次免費分析。\n如果您是需要進行大量研究的「超級用戶」，可以考慮升級到 Pro 版本，或通過「請我喝杯咖啡☕️」來立即重置額度！",
+                welcome_title: "歡迎來到 Project Lens！", welcome_p1: "我能幫你一鍵分析公司文化，避免求職踩坑。請在左側輸入資訊，開始你的第一次探索吧！",
+                rate_limit_exceeded: "開拓者，您今日的免費分析額度已用盡！🚀\n\nProject Lens 每天為所有用戶提供5次免費分析。",
                 connection_error: "發生連接錯誤，請檢查網路或聯絡開發者。",
-                loading_statuses: [
-                    "正在連接AI大腦...", "正在全網搜尋公司資訊...", "正在閱讀相關新聞與評價...",
-                    "正在召喚 Gemini 進行深度分析...", "即將完成，正在生成報告..."
-                ],
-                final_punctuation: '。',
+                loading_statuses: ["正在連接AI大腦...", "正在全網搜尋公司資訊...", "正在閱讀相關新聞與評價...", "正在召喚 Gemini 進行深度分析...", "即將完成，正在生成報告..."],
+                report_titles: {
+                    red_flag: '🚨 Red Flag 風險掃描', culture_fit: '📊 文化契合度分析', hiring_experience: '👻 招聘流程與候選人體驗分析',
+                    value_match: '💖 價值匹配報告', final_risk: '⚖️ 最終風險評估', sources: '引用來源'
+                },
+                aspects: {
+                    reputation: '公司聲譽', management: '管理風格', sustainability: '永續性', wlb: '工作與生活平衡',
+                    growth: '成長機會', salary: '薪酬水平', overtime: '加班文化', rating: '評級'
+                },
                 definitions: {
                     reputation: '公司聲譽是公眾、客戶、員工和投資者對一個組織的綜合看法和評價。',
                     management: '管理風格是指公司各級管理者在領導團隊、分配任務、做出決策時所表現出的一貫行為模式。',
-                    hiring: '招聘體驗是候選人在從申請到入職（或被拒）的整個招聘過程中，對公司產生的主觀感受和總體印象。',
-                    sustainability: '永續性（Sustainability）是指公司在追求經濟利益的同時，如何平衡其對社會和環境的影響，並確保其商業模式能夠長期存在。',
-                    wlb: '工作與生活平衡指的是員工能夠在職業責任和個人生活之間找到一個健康、可持續的平衡點。',
-                    growth: '成長機會指的是公司為員工提供的學習新技能、承擔更多責任、以及在職業生涯中獲得晉升的可能性。',
-                    salary: '薪酬水平指的是公司提供的工資、獎金等現金報酬，在同行業、同地區市場中的相對位置。',
+                    sustainability: '永續性是指公司在追求經濟利益的同時，如何平衡其對社會和環境的影響。',
+                    wlb: '工作與生活平衡指的是員工能夠在職業責任和個人生活之間找到一個健康的平衡點。',
+                    growth: '成長機會指的是公司為員工提供的學習新技能、承擔更多責任、以及獲得晉升的可能性。',
+                    salary: '薪酬水平指的是公司提供的工資、獎金等現金報酬在市場中的相對位置。',
                     overtime: '加班文化是指公司對於正常工作時間之外的額外工作的普遍態度和做法。',
-                },
-                report_titles: {
-                    red_flag: '🚨 Red Flag 風險掃描',
-                    culture_fit: '📊 文化契合度分析',
-                    hiring_experience: '👻 招聘流程與候選人體驗分析',
-                    value_match: '💖 價值匹配報告',
-                    final_risk: '⚖️ 最終風險評估',
-                    sources: '引用來源 (模擬)'
-                },
-                 aspects: {
-                    reputation: '公司聲譽', management: '管理風格', sustainability: '永續性',
-                    wlb: '工作與生活平衡', growth: '成長機會', salary: '薪酬水平', overtime: '加班文化',
-                    rating: '評級'
-                },
-                preview_data: {
-                    red_flag_status_low: '低風險',
-                    red_flag_text: '作為西安大略大學毅偉商學院的一部分，Ivey Publishing 是一個信譽良好的學術出版機構，無詐騙或“空殼公司”風險。<a href="#source-1" class="citation-link">[1]</a>',
-                    analysis_reputation: 'Ivey Publishing 背靠全球頂尖的毅偉商學院，享有極高的學術聲譽和品牌價值。其出版的商業案例被世界各地的大学廣泛採用，是該領域的權威。<a href="#source-1" class="citation-link">[1]</a><a href="#source-2" class="citation-link">[2]</a>',
-                    analysis_management: '管理風格傾向於傳統的學術機構模式，層級結構明確，決策流程較為嚴謹。工作環境專業，但創新和靈活性可能受限於既定流程。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_sustainability: '作為一家學術機構，Ivey Publishing 在內容上推動對永續商業實踐的討論。然而，關於其自身運營（如減少碳足跡、使用環保材料等）的公開資訊較少。<a href="#source-6" class="citation-link">[6]</a>',
-                    analysis_wlb: '工作節奏在學術出版領域相對穩定，但臨近案例發布截止日期時可能會增加強度。總體評價為平衡尚可。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_growth: '內部晉升機會有限，但該職位能提供寶貴的學術出版經驗，為進入更廣泛的教育或出版行業鋪平道路。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_salary: '薪酬水平符合學術機構非營利部門的標準，可能低於商業出版公司，但福利待遇較為全面。<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_overtime: '加班不被視為常態，但在項目高峰期可能需要。通常情況下，加班可以獲得調休。<a href="#source-3" class="citation-link">[3]</a>',
-                    hiring_experience_text: "根據多方平台回饋，Ivey Publishing 的招聘流程週期可能較長。<a href='#source-4' class='citation-link'>[4]</a><br><strong>一個顯著的負面回饋集中在溝通環節：有相當數量的候選人反映，在完成最終面試後未能收到任何後續通知，經歷了被‘Ghosting’的情況。</strong><a href='#source-5' class='citation-link'>[5]</a> 這表明其候選人關係管理方面存在改進空間。",
-                    value_match_score: 88,
-                    value_match_text: '您的人力資源和教育學雙重背景與學術出版領域高度契合。您對人才發展和跨文化溝通的理解，對於處理涉及全球學者和學生的案例出版物是一個明顯的優勢。<a href="#source-1" class="citation-link">[1]</a>',
-                    final_risk_rating: '低-中等風險',
-                    final_risk_text: '機構本身信譽極高（低風險），工作穩定。然而，其招聘流程中反覆出現的溝通不暢和‘Ghosting’問題構成了體驗上的中等風險，可能對求職者的積極性與時間投入造成負面影響。<a href="#source-4" class="citation-link">[4]</a><a href="#source-5" class="citation-link">[5]</a>',
-                    sources: [
-                        { id: 1, title: 'Ivey Business School - 官方網站', link: '#' }, { id: 2, title: '哈佛商業評論 - "Ivey案例的影響"', link: '#' },
-                        { id: 3, title: 'Glassdoor - "在Ivey Publishing工作 - 員工評論"', link: '#' }, { id: 4, title: 'Indeed - "Ivey Publishing 面試流程問題"', link: '#' },
-                        { id: 5, title: 'Reddit (r/UWO) - 討論串: "有人面試過Ivey Publishing嗎?"', link: '#' }, { id: 6, title: 'Ivey Publishing - 年度社會責任報告', link: '#' }
-                    ]
                 }
             },
             'en': {
-                logo_text: '🔬 Project Lens', title: 'Input Information', subtitle: 'AI will simulate an analysis of this institution\'s hiring & culture',
+                logo_text: '🔬 Project Lens', title: 'Input Information', subtitle: 'AI will automatically search and analyze the company',
                 smart_paste_label: 'Paste Job Info or Company Name', smart_paste_placeholder: 'Paste job description (JD) or company name here...',
                 aspects_label: 'Select Aspects You Care About',
                 aspect_wlb: 'Work-Life Balance', aspect_reputation: 'Reputation', aspect_growth: 'Growth Opportunities',
@@ -298,84 +238,39 @@
                 resume_label: 'My Resume / Bio (Optional)', resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...',
                 button_text: 'Analyze', button_loading_text: 'Analyzing...',
                 support_text: "Buy me a coffee",
-                preview_notice: 'This is a static preview to demonstrate the final effect of new features like "Anti-Ghosting" and "Red Flag Scan". Click the button below to see it.',
-                welcome_title: "Welcome to Project Lens!", welcome_p1: "I can help you analyze company culture with one click to avoid job-hunting pitfalls. Please enter a company name on the left to start your first exploration!",
-                rate_limit_exceeded: "Explorer, you have used up your free analysis quota for today! 🚀\n\nProject Lens provides 10 free analyses per day for all users.\nIf you are a 'power user' who needs to conduct a lot of research, consider upgrading to the Pro version or 'Buy me a coffee ☕️' to reset your quota immediately!",
+                welcome_title: "Welcome to Project Lens!", welcome_p1: "I can help you analyze company culture with one click to avoid job-hunting pitfalls. Please enter the info on the left to start your first exploration!",
+                rate_limit_exceeded: "Explorer, you have used up your free analysis quota for today! 🚀\n\nProject Lens provides 5 free analyses per day for all users.",
                 connection_error: "Connection error. Please check your network or contact the developer.",
-                loading_statuses: [
-                    "Connecting to the AI brain...", "Searching for company info across the web...", "Reading related news and reviews...",
-                    "Summoning Gemini for deep analysis...", "Finalizing, generating report..."
-                ],
-                final_punctuation: '.',
-                definitions: {
-                    reputation: 'Corporate reputation is the comprehensive perception and evaluation of an organization by the public, customers, employees, and investors.',
-                    management: 'Management style refers to the consistent pattern of behavior exhibited by managers in leading teams, assigning tasks, and making decisions.',
-                    hiring: 'Candidate experience is the subjective feeling and overall impression a candidate forms about a company throughout the entire recruitment process.',
-                    sustainability: 'Sustainability refers to how a company balances its environmental and social impacts with its economic interests, ensuring its business model is viable for the long term.',
-                    wlb: 'Work-life balance refers to the healthy, sustainable equilibrium employees can find between their professional responsibilities and personal life.',
-                    growth: 'Growth opportunities refer to the possibilities the company provides for employees to learn new skills, take on more responsibilities, and advance in their careers.',
-                    salary: 'Salary level refers to the relative position of the cash compensation, such as wages and bonuses, offered by the company within the same industry and region.',
-                    overtime: 'Overtime culture refers to the company\'s general attitude and practices regarding extra work beyond normal working hours.',
-                },
+                loading_statuses: ["Connecting to the AI brain...", "Searching for company info across the web...", "Reading related news and reviews...", "Summoning Gemini for deep analysis...", "Finalizing, generating report..."],
                 report_titles: {
-                    red_flag: '🚨 Red Flag Scan',
-                    culture_fit: '📊 Culture Fit Analysis',
-                    hiring_experience: '👻 Hiring Process & Candidate Experience Analysis',
-                    value_match: '💖 Value Match Report',
-                    final_risk: '⚖️ Final Risk Assessment',
-                    sources: 'References (Simulated)'
+                    red_flag: '🚨 Red Flag Scan', culture_fit: '📊 Culture Fit Analysis', hiring_experience: '👻 Hiring Process & Candidate Experience Analysis',
+                    value_match: '💖 Value Match Report', final_risk: '⚖️ Final Risk Assessment', sources: 'References'
                 },
                 aspects: {
-                    reputation: 'Reputation', management: 'Management', sustainability: 'Sustainability',
-                    wlb: 'Work-Life Balance', growth: 'Growth Opportunities', salary: 'Salary Level', overtime: 'Overtime Culture',
-                    rating: 'Rating'
+                    reputation: 'Reputation', management: 'Management', sustainability: 'Sustainability', wlb: 'Work-Life Balance',
+                    growth: 'Growth Opportunities', salary: 'Salary Level', overtime: 'Overtime Culture', rating: 'Rating'
                 },
-                 preview_data: {
-                    red_flag_status_low: 'Low Risk',
-                    red_flag_text: 'As part of the Ivey Business School at Western University, Ivey Publishing is a reputable academic publisher with no risk of being a scam or "shell company".<a href="#source-1" class="citation-link">[1]</a>',
-                    analysis_reputation: 'Backed by the world-renowned Ivey Business School, Ivey Publishing holds an exceptional academic reputation and brand value. Its business cases are widely used by universities globally, establishing it as an authority in the field.<a href="#source-1" class="citation-link">[1]</a><a href="#source-2" class="citation-link">[2]</a>',
-                    analysis_management: 'The management style aligns with a traditional academic institution, featuring a clear hierarchical structure and a formal decision-making process. The work environment is professional, though innovation and flexibility might be constrained by established procedures.<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_sustainability: 'As an academic institution, Ivey Publishing promotes discussion of sustainable business practices through its content. However, there is limited public information regarding its own operational sustainability, such as carbon footprint reduction or use of eco-friendly materials.<a href="#source-6" class="citation-link">[6]</a>',
-                    analysis_wlb: 'The work pace is relatively stable in the academic publishing sector, although it can intensify near case-release deadlines. The overall balance is rated as acceptable.<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_growth: 'Internal promotion opportunities are limited, but the role provides valuable experience in academic publishing, paving the way for a broader career in education or publishing industries.<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_salary: 'Compensation is in line with the non-profit sector of academic institutions, which may be lower than commercial publishers, but it is complemented by a comprehensive benefits package.<a href="#source-3" class="citation-link">[3]</a>',
-                    analysis_overtime: 'Overtime is not considered the norm but may be required during peak project periods. It can typically be compensated with time off in lieu.<a href="#source-3" class="citation-link">[3]</a>',
-                    hiring_experience_text: "Based on feedback from multiple platforms, the hiring process at Ivey Publishing can be lengthy.<a href='#source-4' class='citation-link'>[4]</a><br><strong>A significant pattern of negative feedback centers on communication: a considerable number of candidates reported not receiving any follow-up after their final interview, experiencing being 'ghosted'.</strong><a href='#source-5' class='citation-link'>[5]</a> This suggests there is room for improvement in their candidate relationship management.",
-                    value_match_score: 88,
-                    value_match_text: 'Your dual background in Human Resources and Education is highly compatible with the academic publishing sector. Your understanding of talent development and cross-cultural communication is a distinct advantage for handling case publications involving global scholars and students.<a href="#source-1" class="citation-link">[1]</a>',
-                    final_risk_rating: 'Low-to-Medium Risk',
-                    final_risk_text: 'The institution itself is highly reputable (Low Risk) and offers stable employment. However, the recurring communication issues and "ghosting" problems in its hiring process pose a Medium Risk to the candidate experience, potentially impacting applicants\' motivation and time investment.<a href="#source-4" class="citation-link">[4]</a><a href="#source-5" class="citation-link">[5]</a>',
-                    sources: [
-                        { id: 1, title: 'Ivey Business School - Official Website', link: '#' }, { id: 2, title: 'Harvard Business Review - "The Impact of Ivey Cases"', link: '#' },
-                        { id: 3, title: 'Glassdoor - "Working at Ivey Publishing - Employee Reviews"', link: '#' }, { id: 4, title: 'Indeed - "Ivey Publishing Interview Process Questions"', link: '#' },
-                        { id: 5, title: 'Reddit (r/UWO) - Thread: "Anyone interviewed with Ivey Publishing?"', link: '#' }, { id: 6, title: 'Ivey Publishing - Annual Social Responsibility Report', link: '#' }
-                    ]
+                 definitions: {
+                    reputation: 'Corporate reputation is the comprehensive perception and evaluation of an organization by the public, customers, employees, and investors.',
+                    management: 'Management style refers to the consistent pattern of behavior exhibited by managers in leading teams, assigning tasks, and making decisions.',
+                    sustainability: 'Sustainability refers to how a company balances its environmental and social impacts with its economic interests.',
+                    wlb: 'Work-life balance refers to the healthy, sustainable equilibrium employees can find between their professional responsibilities and personal life.',
+                    growth: 'Growth opportunities refer to the possibilities the company provides for employees to learn new skills, take on more responsibilities, and advance in their careers.',
+                    salary: 'Salary level refers to the relative position of the cash compensation offered by the company within the market.',
+                    overtime: 'Overtime culture refers to the company\'s general attitude and practices regarding extra work beyond normal working hours.',
                 }
             }
         };
 
-        // --- 4. 核心函数 ---
+        // --- 5. 核心函数 ---
         function setLanguage(langCode) {
             currentLang = langCode;
             document.documentElement.lang = langCode;
-            const t = translations[langCode];
-            // Update all elements with data-key attribute
-            document.querySelectorAll('[data-key]').forEach(elem => { 
-                const key = elem.getAttribute('data-key'); 
-                if (t[key]) {
-                     elem.textContent = t[key];
-                } else if (t.aspect_wlb && key.startsWith('aspect_')) { // Check if aspect translations exist
-                    const aspectKey = key.replace('aspect_', '');
-                    if(t[key]) elem.textContent = t[key];
-                }
-            });
-
-            document.querySelectorAll('[data-key-placeholder]').forEach(elem => { 
-                const key = elem.getAttribute('data-key-placeholder'); 
-                if (t[key]) elem.placeholder = t[key]; 
-            });
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-key]').forEach(elem => { const key = elem.dataset.key; if (t[key]) elem.textContent = t[key]; });
+            document.querySelectorAll('[data-key-placeholder]').forEach(elem => { const key = elem.dataset.keyPlaceholder; if (t[key]) elem.placeholder = t[key]; });
             logo.textContent = t.logo_text;
-            langToggle.querySelectorAll('button').forEach(button => button.classList.toggle('active', button.dataset.lang === langCode));
+            langToggle.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === langCode));
         }
 
         function setTheme(theme) {
@@ -383,42 +278,54 @@
             themeSwitcher.textContent = theme === 'light' ? '🌙' : '☀️';
             localStorage.setItem('theme', theme);
         }
-
-        // Renders the new, structured report using the static preview data.
-        function renderPreviewReport() {
+        
+        // --- THIS IS THE NEW LIVE REPORT RENDERER ---
+        function renderReport(reportData, sourcesData) {
             const t = translations[currentLang];
             const titles = t.report_titles;
-            const p = t.preview_data;
-            const defs = t.definitions;
             const aspects = t.aspects;
+            const defs = t.definitions;
 
-            const redFlagHTML = `<div class="report-section success"><h2>${titles.red_flag}</h2><p><span class="status">${p.red_flag_status_low} ✅:</span> ${p.red_flag_text}</p></div>`;
-            const hiringExperienceHTML = `<div class="report-section warning"><h2>${titles.hiring_experience}<span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">${defs.hiring}</span></span></h2><p>${p.hiring_experience_text}</p></div>`;
+            // Helper to process text: parse markdown and link citations
+            const processText = (text) => {
+                if (!text) return '';
+                // Convert [1] into a clickable link that jumps to the source
+                const linkedText = text.replace(/\[(\d+)\]/g, `<a href="#source-$1" class="citation-link">[$1]</a>`);
+                return marked.parse(linkedText);
+            };
+            
+            // Build Report Sections
+            const redFlagHTML = reportData.red_flag_text ? `<div class="report-section success"><h2>${titles.red_flag}</h2><div class="status">${processText(reportData.red_flag_status)}</div>${processText(reportData.red_flag_text)}</div>` : '';
+            const hiringExperienceHTML = reportData.hiring_experience_text ? `<div class="report-section warning"><h2>${titles.hiring_experience}</h2>${processText(reportData.hiring_experience_text)}</div>` : '';
 
             let cultureFitHTML = `<h2>${titles.culture_fit}</h2>`;
-            const analysisAspects = ['reputation', 'management', 'sustainability', 'wlb', 'growth', 'salary', 'overtime'];
-            analysisAspects.forEach(aspect => {
-                cultureFitHTML += `
-                    <h3>
-                        ${aspects[aspect]}
-                        <span class="tooltip-container">
-                            <span class="tooltip-icon">i</span>
-                            <span class="tooltip-text">${defs[aspect]}</span>
-                        </span>
-                    </h3>
-                    <p>${p['analysis_' + aspect]}</p>`;
-            });
-
-            const valueMatchHTML = `<h2>${titles.value_match}</h2><div class="progress-bar-container"><div class="progress-bar" style="width: ${p.value_match_score}%;">${p.value_match_score}%</div></div><p>${p.value_match_text}</p>`;
-            const finalRiskHTML = `<h2>${titles.final_risk}</h2><p><strong>${t.aspects.rating}: ${p.final_risk_rating}${t.final_punctuation}</strong> ${p.final_risk_text}</p>`;
+            const cf = reportData.culture_fit || {};
+            for (const key in cf) {
+                if (cf[key] && aspects[key] && defs[key]) {
+                    cultureFitHTML += `
+                        <h3>
+                            ${aspects[key]}
+                            <span class="tooltip-container">
+                                <span class="tooltip-icon">i</span>
+                                <span class="tooltip-text">${defs[key]}</span>
+                            </span>
+                        </h3>
+                        ${processText(cf[key])}`;
+                }
+            }
             
-            resultContainer.innerHTML = DOMPurify.sanitize(redFlagHTML + hiringExperienceHTML + cultureFitHTML + valueMatchHTML + finalRiskHTML, {ADD_TAGS: ['span', 'div', 'ul', 'li', 'strong', 'a', 'br', 'h2', 'h3', 'p'], ADD_ATTR: ['style', 'href', 'class', 'target', 'rel']});
+            const valueMatchHTML = reportData.value_match_score > 0 ? `<h2>${titles.value_match}</h2><div class="progress-bar-container"><div class="progress-bar" style="width: ${reportData.value_match_score}%;">${reportData.value_match_score}%</div></div>${processText(reportData.value_match_text)}` : '';
+            const finalRiskHTML = reportData.final_risk_rating ? `<h2>${titles.final_risk}</h2><p><strong>${aspects.rating}: ${reportData.final_risk_rating}</strong></p>${processText(reportData.final_risk_text)}` : '';
 
+            resultContainer.innerHTML = DOMPurify.sanitize(redFlagHTML + hiringExperienceHTML + cultureFitHTML + valueMatchHTML + finalRiskHTML, {ADD_TAGS: ['span', 'div', 'ul', 'li', 'strong', 'a', 'br', 'h2', 'h3', 'p', 'em', 'strong', 'b', 'i'], ADD_ATTR: ['style', 'href', 'class', 'target', 'rel']});
+            
+            // Build Sources with REAL links from the backend
             let sourcesHTML = `<h2>${titles.sources}</h2>`;
-            p.sources.forEach(source => {
-                sourcesHTML += `<div class="source-item" id="source-${source.id}"><span>[${source.id}]</span><a href="${source.link}" target="_blank" rel="noopener noreferrer">${source.title}</a></div>`;
+            sourcesData.forEach(source => {
+                const icon = ICONS[source.source_type] || ICONS.default;
+                sourcesHTML += `<div class="source-item" id="source-${source.id}">${icon}<span>[${source.id}]</span><a href="${source.link}" target="_blank" rel="noopener noreferrer">${source.title}</a></div>`;
             });
-            sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_TAGS: ['div', 'span', 'a'], ADD_ATTR: ['id', 'href', 'target', 'rel']});
+            sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_TAGS: ['div', 'span', 'a', 'svg', 'path'], ADD_ATTR: ['id', 'href', 'target', 'rel', 'class', 'xmlns', 'width', 'height', 'fill', 'viewBox', 'd', 'fill-rule']});
         }
         
         let loadingInterval = null;
@@ -426,7 +333,7 @@
             const t = translations[currentLang];
             const buttonTextSpan = analyzeButton.querySelector('span');
             
-            // --- Start Loading UI ---
+            // Start Loading UI
             buttonTextSpan.textContent = t.button_loading_text;
             analyzeButton.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
             analyzeButton.disabled = true;
@@ -436,33 +343,33 @@
             const loadingStatuses = t.loading_statuses;
             resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex]}</p>`;
             statusIndex++;
-            
             loadingInterval = setInterval(() => {
                 if (statusIndex < loadingStatuses.length) {
                     resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex]}</p>`;
                     statusIndex++;
-                } else {
-                    clearInterval(loadingInterval);
-                }
+                } else { clearInterval(loadingInterval); }
             }, 2500);
 
+            const selectedAspects = Array.from(document.querySelectorAll('#aspect-tags input:checked')).map(input => input.value);
             const data = { 
-                companyName: smartPasteBox.value, // Changed from companyNameInput
-                jobTitle: '', // Job title is now part of the smart paste box
+                companyName: smartPasteBox.value,
                 resumeText: resumeTextInput.value, 
-                language: currentLang 
+                language: currentLang,
+                aspects: selectedAspects
             };
 
+            // --- THIS IS THE REAL API CALL ---
             try {
-                await new Promise(resolve => setTimeout(resolve, 3000)); // Fake network delay
-                const response = { ok: true }; 
-
+                const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 if (loadingInterval) clearInterval(loadingInterval);
+                
+                const result = await response.json();
 
                 if (response.ok) {
-                    renderPreviewReport();
+                    // Call the new live renderer with REAL data
+                    renderReport(result.report, result.sources);
                 } else {
-                    if (response.status === 429 || result.error === 'rate_limit_exceeded') {
+                     if (response.status === 429) {
                         resultContainer.innerHTML = `<h2 style="color: var(--primary-color);">Quota Reached</h2><p style="white-space: pre-wrap;">${t.rate_limit_exceeded}</p>`;
                     } else {
                         resultContainer.innerHTML = `<h2>Error</h2><p>${result.error || 'Unknown error'}</p>`;
@@ -480,16 +387,16 @@
             }
         });
 
-        // --- 5. 初始化 ---
+        // --- 6. 初始化 ---
         themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
         langToggle.addEventListener('click', (event) => { if (event.target.tagName === 'BUTTON') { setLanguage(event.target.dataset.lang); } });
-        
-        // Initial page load setup
         setTheme(localStorage.getItem('theme') || 'dark');
         setLanguage('zh-CN');
     </script>
 </body>
 </html>
+
+
 
 
 
