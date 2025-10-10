@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v12.2 - Live API</title>
+    <title>职场透镜 (Project Lens) v13.0 - Direct Link Fix</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -148,8 +148,6 @@
         const logo = document.getElementById('logo');
 
         // --- 2. API 配置 ---
-        // ！！！重要！！！
-        // 请在此处替换为你在 Google Cloud Run 上服务的正确 URL！
         const API_URL = 'https://project-lens-backend-885033581194.us-central1.run.app/analyze'; 
 
         // --- 3. 图标定义 (无变化) ---
@@ -288,11 +286,25 @@
             const aspects = t.aspects;
             const defs = t.definitions;
 
-            // Helper to process text: parse markdown and link citations
+            // --- 【核心修正】第一步：创建一个从 source ID 到 source Link 的映射 ---
+            const sourceLinkMap = {};
+            sourcesData.forEach(source => {
+                sourceLinkMap[source.id] = source.link;
+            });
+
+            // --- 【核心修正】第二步：更新 processText 函数，让它生成直达外部网站的链接 ---
             const processText = (text) => {
                 if (!text) return '';
-                // Convert [1] into a clickable link that jumps to the source
-                const linkedText = text.replace(/\[(\d+)\]/g, `<a href="#source-$1" class="citation-link">[$1]</a>`);
+                // 将 [数字] 标记转换为直接打开新标签页的外部链接
+                const linkedText = text.replace(/\[(\d+)\]/g, (match, id) => {
+                    const url = sourceLinkMap[id];
+                    // 只有当这个ID存在对应的URL时，才创建链接
+                    if (url) {
+                        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="citation-link">[${id}]</a>`;
+                    }
+                    // 如果找不到URL，就只显示原始的[数字]文本
+                    return match;
+                });
                 return marked.parse(linkedText);
             };
             
@@ -319,7 +331,7 @@
             const valueMatchHTML = reportData.value_match_score > 0 ? `<h2>${titles.value_match}</h2><div class="progress-bar-container"><div class="progress-bar" style="width: ${reportData.value_match_score}%;">${reportData.value_match_score}%</div></div>${processText(reportData.value_match_text)}` : '';
             const finalRiskHTML = reportData.final_risk_rating ? `<h2>${titles.final_risk}</h2><p><strong>${aspects.rating}: ${reportData.final_risk_rating}</strong></p>${processText(reportData.final_risk_text)}` : '';
 
-            resultContainer.innerHTML = DOMPurify.sanitize(redFlagHTML + hiringExperienceHTML + cultureFitHTML + valueMatchHTML + finalRiskHTML, {ADD_TAGS: ['span', 'div', 'ul', 'li', 'strong', 'a', 'br', 'h2', 'h3', 'p', 'em', 'strong', 'b', 'i'], ADD_ATTR: ['style', 'href', 'class', 'target', 'rel']});
+            resultContainer.innerHTML = DOMPurify.sanitize(redFlagHTML + hiringExperienceHTML + cultureFitHTML + valueMatchHTML + finalRiskHTML, {ADD_TAGS: ['span', 'div', 'ul', 'li', 'strong', 'a', 'br', 'h2', 'h3', 'p', 'em', 'strong', 'b', 'i'], ADD_ATTR: ['style', 'href', 'class', 'target', 'rel', 'noopener', 'noreferrer']});
             
             // Build Sources with REAL links from the backend
             let sourcesHTML = `<h2>${titles.sources}</h2>`;
@@ -392,6 +404,9 @@
         // --- 6. 初始化 ---
         themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
         langToggle.addEventListener('click', (event) => { if (event.target.tagName === 'BUTTON') { setLanguage(event.target.dataset.lang); } });
+        
+        // --- 【核心修正】旧的点击滚动监听器已被移除，因为不再需要了 ---
+
         setTheme(localStorage.getItem('theme') || 'dark');
         setLanguage('zh-CN');
     </script>
