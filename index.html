@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v14.0 - Interactive Report</title>
+    <title>职场透镜 (Project Lens) v18.0 - Aspect Expansion</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -111,9 +111,13 @@
                         <input type="checkbox" id="wlb" value="wlb" checked><label for="wlb" data-key="aspect_wlb"></label>
                         <input type="checkbox" id="reputation" value="reputation" checked><label for="reputation" data-key="aspect_reputation"></label>
                         <input type="checkbox" id="growth" value="growth" checked><label for="growth" data-key="aspect_growth"></label>
+                        <input type="checkbox" id="innovation" value="innovation"><label for="innovation" data-key="aspect_innovation"></label>
                         <input type="checkbox" id="salary" value="salary" checked><label for="salary" data-key="aspect_salary"></label>
+                        <input type="checkbox" id="benefits" value="benefits"><label for="benefits" data-key="aspect_benefits"></label>
                         <input type="checkbox" id="overtime" value="overtime" checked><label for="overtime" data-key="aspect_overtime"></label>
                         <input type="checkbox" id="management" value="management"><label for="management" data-key="aspect_management"></label>
+                        <input type="checkbox" id="diversity" value="diversity"><label for="diversity" data-key="aspect_diversity"></label>
+                        <input type="checkbox" id="training" value="training"><label for="training" data-key="aspect_training"></label>
                         <input type="checkbox" id="sustainability" value="sustainability"><label for="sustainability" data-key="aspect_sustainability"></label>
                     </div>
                 </div>
@@ -171,8 +175,9 @@
                 smart_paste_label: '粘贴职位信息或公司名', smart_paste_placeholder: '在此处粘贴职位描述(JD)或公司名...',
                 aspects_label: '选择你关注的方面 (分析后可随时切换)',
                 aspect_wlb: '工作与生活平衡', aspect_reputation: '公司声誉', aspect_growth: '成长机会',
-                aspect_salary: '薪酬水平', aspect_overtime: '加班文化', aspect_management: '管理风格',
-                aspect_sustainability: '可持续性',
+                aspect_innovation: '创新文化', aspect_salary: '薪酬水平', aspect_benefits: '福利待遇',
+                aspect_overtime: '加班文化', aspect_management: '管理风格', aspect_diversity: '多元化与包容性',
+                aspect_training: '培训与学习', aspect_sustainability: '可持续性',
                 resume_label: '我的简历 / 个人简介 (可选)', resume_placeholder: '粘贴你的个人简介或简历，获得更精准的匹配分析...',
                 button_text: '开始分析', button_loading_text: '分析中...',
                 support_text: "请开发者喝杯咖啡",
@@ -183,12 +188,12 @@
                 loading_statuses: ["正在连接AI大脑...", "正在全网搜索公司信息...", "正在阅读相关新闻与评价...", "正在召唤 Gemini 进行深度分析...", "即将完成，正在生成报告..."],
                 report_titles: {
                     red_flag: '🚨 Red Flag 风险扫描', culture_fit: '📊 文化契合度分析', hiring_experience: '👻 招聘流程与候选人体验分析',
-                    timeliness: '⏱️ 信息时效性分析',
-                    value_match: '💖 价值匹配报告', final_risk: '⚖️ 最终风险评估', sources: '引用来源'
+                    timeliness: '⏱️ 信息时效性分析', value_match: '💖 价值匹配报告', final_risk: '⚖️ 最终风险评估', sources: '引用来源'
                 },
                 aspects: {
                     reputation: '公司声誉', management: '管理风格', sustainability: '可持续性', wlb: '工作与生活平衡',
-                    growth: '成长机会', salary: '薪酬水平', overtime: '加班文化', rating: '评级'
+                    growth: '成长机会', salary: '薪酬水平', overtime: '加班文化', innovation: '创新文化',
+                    benefits: '福利待遇', diversity: '多元化与包容性', training: '培训与学习', rating: '评级'
                 },
                 definitions: {
                     reputation: '公司声誉是公众、客户、员工和投资者对一个组织的综合看法和评价。',
@@ -198,6 +203,10 @@
                     growth: '成长机会指的是公司为员工提供的学习新技能、承担更多责任、以及获得晉升的可能性。',
                     salary: '薪酬水平指的是公司提供的工资、奖金等现金报酬在市场中的相对位置。',
                     overtime: '加班文化是指公司对于正常工作时间之外的额外工作的普遍态度和做法。',
+                    innovation: '创新文化是指公司鼓励和支持员工提出新想法、尝试新方法并从失败中学习的内部环境。',
+                    benefits: '福利待遇是指公司在工资之外为员工提供的非现金形式的报酬，如健康保险、退休金计划、带薪休假等。',
+                    diversity: '多元化与包容性是指公司在员工构成上体现多样性，并创造一个让所有背景的员工都感到被尊重和重视的工作环境。',
+                    training: '培训与学习指的是公司为提升员工技能和知识而提供的各种正式和非正式的学习机会。',
                 }
             },
             'zh-TW': {
@@ -205,8 +214,9 @@
                 smart_paste_label: '貼上職位資訊或公司名', smart_paste_placeholder: '在此處貼上職位描述(JD)或公司名...',
                 aspects_label: '選擇您關注的方面 (分析後可隨時切換)',
                 aspect_wlb: '工作與生活平衡', aspect_reputation: '公司聲譽', aspect_growth: '成長機會',
-                aspect_salary: '薪酬水平', aspect_overtime: '加班文化', aspect_management: '管理風格',
-                aspect_sustainability: '永續性',
+                aspect_innovation: '創新文化', aspect_salary: '薪酬水平', aspect_benefits: '福利待遇',
+                aspect_overtime: '加班文化', aspect_management: '管理風格', aspect_diversity: '多元化與包容性',
+                aspect_training: '培訓與學習', aspect_sustainability: '永續性',
                 resume_label: '我的履歷 / 個人簡介 (可選)', resume_placeholder: '貼上你的個人簡介或履歷，獲得更精準的匹配分析...',
                 button_text: '開始分析', button_loading_text: '分析中...',
                 support_text: "請開發者喝杯咖啡",
@@ -217,12 +227,12 @@
                 loading_statuses: ["正在連接AI大腦...", "正在全網搜尋公司資訊...", "正在閱讀相關新聞與評價...", "正在召喚 Gemini 進行深度分析...", "即將完成，正在生成報告..."],
                 report_titles: {
                     red_flag: '🚨 Red Flag 風險掃描', culture_fit: '📊 文化契合度分析', hiring_experience: '👻 招聘流程與候選人體驗分析',
-                    timeliness: '⏱️ 資訊時效性分析',
-                    value_match: '💖 價值匹配報告', final_risk: '⚖️ 最終風險評估', sources: '引用來源'
+                    timeliness: '⏱️ 資訊時效性分析', value_match: '💖 價值匹配報告', final_risk: '⚖️ 最終風險評估', sources: '引用來源'
                 },
                 aspects: {
                     reputation: '公司聲譽', management: '管理風格', sustainability: '永續性', wlb: '工作與生活平衡',
-                    growth: '成長機會', salary: '薪酬水平', overtime: '加班文化', rating: '評級'
+                    growth: '成長機會', salary: '薪酬水平', overtime: '加班文化', innovation: '創新文化',
+                    benefits: '福利待遇', diversity: '多元化與包容性', training: '培訓與學習', rating: '評級'
                 },
                 definitions: {
                     reputation: '公司聲譽是公眾、客戶、員工和投資者對一個組織的綜合看法和評價。',
@@ -232,6 +242,10 @@
                     growth: '成長機會指的是公司為員工提供的學習新技能、承擔更多責任、以及獲得晉升的可能性。',
                     salary: '薪酬水平指的是公司提供的工資、獎金等現金報酬在市場中的相對位置。',
                     overtime: '加班文化是指公司對於正常工作時間之外的額外工作的普遍態度和做法。',
+                    innovation: '創新文化是指公司鼓勵和支持員工提出新想法、嘗試新方法並從失敗中學習的內部環境。',
+                    benefits: '福利待遇是指公司在工資之外為員工提供的非現金形式的報酬，如健康保險、退休金計畫、帶薪休假等。',
+                    diversity: '多元化與包容性是指公司在員工構成上體現多樣性，並創造一個讓所有背景的員工都感到被尊重和重視的工作環境。',
+                    training: '培訓與學習指的是公司為提升員工技能和知識而提供的各種正式和非正式的學習機會。',
                 }
             },
             'en': {
@@ -239,8 +253,9 @@
                 smart_paste_label: 'Paste Job Info or Company Name', smart_paste_placeholder: 'Paste job description (JD) or company name here...',
                 aspects_label: 'Select Aspects You Care About (Switch anytime after analysis)',
                 aspect_wlb: 'Work-Life Balance', aspect_reputation: 'Reputation', aspect_growth: 'Growth Opportunities',
-                aspect_salary: 'Salary Level', aspect_overtime: 'Overtime Culture', aspect_management: 'Management',
-                aspect_sustainability: 'Sustainability',
+                aspect_innovation: 'Innovation Culture', aspect_salary: 'Salary Level', aspect_benefits: 'Benefits Package',
+                aspect_overtime: 'Overtime Culture', aspect_management: 'Management', aspect_diversity: 'Diversity & Inclusion',
+                aspect_training: 'Training & Learning', aspect_sustainability: 'Sustainability',
                 resume_label: 'My Resume / Bio (Optional)', resume_placeholder: 'Paste your bio or resume for a more accurate culture-fit analysis...',
                 button_text: 'Analyze', button_loading_text: 'Analyzing...',
                 support_text: "Buy me a coffee",
@@ -251,12 +266,12 @@
                 loading_statuses: ["Connecting to the AI brain...", "Searching for company info across the web...", "Reading related news and reviews...", "Summoning Gemini for deep analysis...", "Finalizing, generating report..."],
                 report_titles: {
                     red_flag: '🚨 Red Flag Scan', culture_fit: '📊 Culture Fit Analysis', hiring_experience: '👻 Hiring Process & Candidate Experience Analysis',
-                    timeliness: '⏱️ Information Timeliness Analysis',
-                    value_match: '💖 Value Match Report', final_risk: '⚖️ Final Risk Assessment', sources: 'References'
+                    timeliness: '⏱️ Information Timeliness Analysis', value_match: '💖 Value Match Report', final_risk: '⚖️ Final Risk Assessment', sources: 'References'
                 },
                 aspects: {
                     reputation: 'Reputation', management: 'Management', sustainability: 'Sustainability', wlb: 'Work-Life Balance',
-                    growth: 'Growth Opportunities', salary: 'Salary Level', overtime: 'Overtime Culture', rating: 'Rating'
+                    growth: 'Growth Opportunities', salary: 'Salary Level', overtime: 'Overtime Culture', innovation: 'Innovation Culture',
+                    benefits: 'Benefits Package', diversity: 'Diversity & Inclusion', training: 'Training & Learning', rating: 'Rating'
                 },
                  definitions: {
                     reputation: 'Corporate reputation is the comprehensive perception and evaluation of an organization by the public, customers, employees, and investors.',
@@ -266,11 +281,15 @@
                     growth: 'Growth opportunities refer to the possibilities the company provides for employees to learn new skills, take on more responsibilities, and advance in their careers.',
                     salary: 'Salary level refers to the relative position of the cash compensation offered by the company within the market.',
                     overtime: 'Overtime culture refers to the company\'s general attitude and practices regarding extra work beyond normal working hours.',
+                    innovation: 'Innovation culture refers to the internal environment where the company encourages and supports employees to propose new ideas, try new methods, and learn from failures.',
+                    benefits: 'Benefits package refers to non-cash compensation provided to employees in addition to their wages, such as health insurance, retirement plans, paid time off, etc.',
+                    diversity: 'Diversity and Inclusion refers to having a diverse workforce and creating a work environment where employees from all backgrounds feel respected and valued.',
+                    training: 'Training and Learning refers to the various formal and informal learning opportunities provided by the company to enhance employee skills and knowledge.',
                 }
             }
         };
 
-        // --- 6. 核心函数 [已重构] ---
+        // --- 6. 核心函数 (无变化) ---
         function setLanguage(langCode) {
             currentLang = langCode;
             document.documentElement.lang = langCode;
@@ -289,7 +308,7 @@
 
         // --- 核心优化：按需渲染报告的函数 ---
         function renderReport() {
-            if (!fullReportData) return; // 如果没有报告数据，则不执行任何操作
+            if (!fullReportData) return;
 
             const t = translations[currentLang];
             const titles = t.report_titles;
@@ -311,7 +330,6 @@
             const getSelectedAspects = () => Array.from(aspectTagsContainer.querySelectorAll('input:checked')).map(input => input.value);
             const selectedAspects = getSelectedAspects();
             
-            // 构建报告的各个部分
             const redFlagHTML = fullReportData.red_flag_text ? `<div class="report-section success"><h2>${titles.red_flag}</h2><div class="status">${processText(fullReportData.red_flag_status)}</div>${processText(fullReportData.red_flag_text)}</div>` : '';
             const hiringExperienceHTML = fullReportData.hiring_experience_text ? `<div class="report-section warning"><h2>${titles.hiring_experience}</h2>${processText(fullReportData.hiring_experience_text)}</div>` : '';
             const timelinessHTML = fullReportData.timeliness_analysis ? `<div class="report-section info"><h2>${titles.timeliness}</h2>${processText(fullReportData.timeliness_analysis)}</div>` : '';
@@ -319,18 +337,9 @@
             let cultureFitHTML = `<h2>${titles.culture_fit}</h2>`;
             const cf = fullReportData.culture_fit || {};
             let hasCultureFitContent = false;
-            // 只渲染用户选择的方面
             selectedAspects.forEach(key => {
                  if (cf[key] && aspects[key] && defs[key]) {
-                    cultureFitHTML += `
-                        <h3>
-                            ${aspects[key]}
-                            <span class="tooltip-container">
-                                <span class="tooltip-icon">i</span>
-                                <span class="tooltip-text">${defs[key]}</span>
-                            </span>
-                        </h3>
-                        ${processText(cf[key])}`;
+                    cultureFitHTML += `<h3>${aspects[key]}<span class="tooltip-container"><span class="tooltip-icon">i</span><span class="tooltip-text">${defs[key]}</span></span></h3>${processText(cf[key])}`;
                     hasCultureFitContent = true;
                 }
             });
@@ -349,6 +358,7 @@
             sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_TAGS: ['div', 'span', 'a', 'svg', 'path'], ADD_ATTR: ['id', 'href', 'target', 'rel', 'class', 'xmlns', 'width', 'height', 'fill', 'viewBox', 'd', 'fill-rule']});
         }
         
+        // --- 7. 核心事件处理 (无变化) ---
         let loadingInterval = null;
         analyzeButton.addEventListener('click', async function() {
             const t = translations[currentLang];
@@ -358,72 +368,63 @@
             analyzeButton.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
             analyzeButton.disabled = true;
             sourcesContainer.innerHTML = '';
-            fullReportData = null; // 重置报告缓存
-            sourcesData = null;   // 重置源数据缓存
+            fullReportData = null; 
+            sourcesData = null;
 
             let statusIndex = 0;
             const loadingStatuses = t.loading_statuses;
-            resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex]}</p>`;
-            statusIndex++;
+            resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex++]}</p>`;
             loadingInterval = setInterval(() => {
                 if (statusIndex < loadingStatuses.length) {
-                    resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex]}</p>`;
-                    statusIndex++;
+                    resultContainer.innerHTML = `<p>${loadingStatuses[statusIndex++]}</p>`;
                 } else { clearInterval(loadingInterval); }
             }, 2500);
 
-            const selectedAspects = Array.from(aspectTagsContainer.querySelectorAll('input:checked')).map(input => input.value);
             const data = { 
                 companyName: smartPasteBox.value,
                 resumeText: resumeTextInput.value, 
-                language: currentLang,
-                aspects: selectedAspects 
+                language: currentLang
             };
 
             try {
                 const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-                if (loadingInterval) clearInterval(loadingInterval);
-                
                 const result = await response.json();
+                clearInterval(loadingInterval);
 
                 if (response.ok) {
                     fullReportData = result.report;
                     sourcesData = result.sources;
                     renderReport();
                 } else {
-                     let errorMessage = t.connection_error; // 默认错误信息
-                     if (response.status === 429 && result.error === 'rate_limit_exceeded') {
-                        errorMessage = t.rate_limit_exceeded;
-                     } else if (response.status === 404 && result.error === 'no_info_found') {
-                        errorMessage = t.no_info_found;
-                     } else if (result.error) {
-                        errorMessage = result.error;
-                     }
+                     let errorMessage = t.connection_error;
+                     if (response.status === 429) errorMessage = t.rate_limit_exceeded;
+                     else if (response.status === 404) errorMessage = t.no_info_found;
+                     else if (result.error) errorMessage = result.error;
                      resultContainer.innerHTML = `<h2 style="color: var(--danger-color);">Error</h2><p style="white-space: pre-wrap;">${errorMessage}</p>`;
                 }
             } catch (error) {
-                if (loadingInterval) clearInterval(loadingInterval);
+                clearInterval(loadingInterval);
                 resultContainer.innerHTML = `<h2>Error</h2><p>${t.connection_error}</p>`;
                 console.error("Fetch Error:", error);
             } finally {
-                if (loadingInterval) clearInterval(loadingInterval);
+                clearInterval(loadingInterval);
                 buttonTextSpan.textContent = t.button_text;
                 if(analyzeButton.querySelector('.spinner')) analyzeButton.querySelector('.spinner').remove();
                 analyzeButton.disabled = false;
             }
         });
 
-        // --- 7. 初始化和事件监听 ---
+        // --- 8. 初始化和事件监听 (无变化) ---
         themeSwitcher.addEventListener('click', () => setTheme(document.documentElement.classList.contains('light-mode') ? 'dark' : 'light'));
         langToggle.addEventListener('click', (event) => { 
             if (event.target.tagName === 'BUTTON') { 
                 setLanguage(event.target.dataset.lang);
-                renderReport(); // 切换语言后重新渲染报告
+                renderReport();
             }
         });
         
         aspectTagsContainer.addEventListener('change', () => {
-            if (fullReportData) { // 只有在已有报告时才重新渲染
+            if (fullReportData) { 
                 renderReport();
             }
         });
