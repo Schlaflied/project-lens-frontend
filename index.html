@@ -171,7 +171,7 @@
             default: `<svg class="source-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/><path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/></svg>`
         };
 
-        // --- 5. 国际化 (i18n) (无变化) ---
+        // --- 5. 国际化 (i18n) ---
         let currentLang = 'zh-CN';
         const translations = {
             'zh-CN': { 
@@ -188,6 +188,8 @@
                 welcome_title: "欢迎来到 Project Lens！", welcome_p1: "我能帮你一键分析公司文化，避免求职踩坑。请在左侧输入信息，开始你的第一次探索吧！",
                 no_info_found: "抱歉，我在网络上找不到关于这家公司的有效信息。请尝试使用公司的官方全称再试一次。",
                 connection_error: "发生连接错误，请检查网络或联系开发者。",
+                // ✨ 新增：将后端的多语言文案库移至此处，作为备用方案
+                rate_limit_exceeded: "开拓者，你已经用完了今日的额度。🚀 Project Lens每天为用户提供五次免费公司查询，如果你是重度用户，通过订阅Pro（Coming Soon）或者请我喝杯咖啡☕️来重置查询次数。",
                 loading_statuses: ["正在连接AI大脑...", "正在全网搜索公司信息...", "正在阅读相关新闻与评价...", "正在召唤 Gemini 进行深度分析...", "即将完成，正在生成报告..."],
                 report_titles: {
                     red_flag: '🚨 Red Flag 风险扫描', culture_fit: '📊 文化契合度分析', hiring_experience: '👻 招聘流程与候选人体验分析',
@@ -226,6 +228,7 @@
                 welcome_title: "歡迎來到 Project Lens！", welcome_p1: "我能幫你一鍵分析公司文化，避免求職踩坑。請在左側輸入資訊，開始你的第一次探索吧！",
                 no_info_found: "抱歉，我在網路上找不到關於這家公司的有效資訊。請嘗試使用公司的官方全名再試一次。",
                 connection_error: "發生連接錯誤，請檢查網路或聯絡開發者。",
+                rate_limit_exceeded: "開拓者，你已經用完了今日的額度。🚀 Project Lens每天為用戶提供五次免費公司查詢，如果你是重度用戶，通過訂閱Pro（Coming Soon）或者請我喝杯咖啡☕️來重置查詢次數。",
                 loading_statuses: ["正在連接AI大腦...", "正在全網搜尋公司資訊...", "正在閱讀相關新聞與評價...", "正在召喚 Gemini 進行深度分析...", "即將完成，正在生成報告..."],
                 report_titles: {
                     red_flag: '🚨 Red Flag 風險掃描', culture_fit: '📊 文化契合度分析', hiring_experience: '👻 招聘流程與候選人體驗分析',
@@ -264,6 +267,7 @@
                 welcome_title: "Welcome to Project Lens!", welcome_p1: "I can help you analyze company culture with one click to avoid job-hunting pitfalls. Please enter the info on the left to start your first exploration!",
                 no_info_found: "Sorry, I couldn't find any valid information about this company online. Please try again using the company's official full name.",
                 connection_error: "Connection error. Please check your network or contact the developer.",
+                rate_limit_exceeded: "Explorer, you have used up your free analysis quota for today. 🚀 Project Lens provides five free company analyses per day. If you're a heavy user, you can reset your query count by subscribing to Pro (Coming Soon) or by buying me a coffee ☕️.",
                 loading_statuses: ["Connecting to the AI brain...", "Searching for company info across the web...", "Reading related news and reviews...", "Summoning Gemini for deep analysis...", "Finalizing, generating report..."],
                 report_titles: {
                     red_flag: '🚨 Red Flag Scan', culture_fit: '📊 Culture Fit Analysis', hiring_experience: '👻 Hiring Process & Candidate Experience Analysis',
@@ -394,7 +398,10 @@
                 } else {
                     // 4. 现在可以安全地使用 result.message
                     let errorMessage = result.message || t.connection_error;
-                    if (response.status === 404) {
+                     if (response.status === 429) {
+                        // 如果后端没返回message，就用我们本地的备用文案
+                        errorMessage = result.message || t.rate_limit_exceeded;
+                    } else if (response.status === 404) {
                         errorMessage = t.no_info_found;
                     }
                     resultContainer.innerHTML = `<h2 style="color: var(--danger-color);">Error</h2><p style="white-space: pre-wrap;">${errorMessage}</p>`;
@@ -420,3 +427,4 @@
     </script>
 </body>
 </html>
+
