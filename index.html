@@ -186,7 +186,6 @@
                 button_text: '开始分析', button_loading_text: '分析中...',
                 support_text: "请开发者喝杯咖啡",
                 welcome_title: "欢迎来到 Project Lens！", welcome_p1: "我能帮你一键分析公司文化，避免求职踩坑。请在左侧输入信息，开始你的第一次探索吧！",
-                // 旧的rate_limit_exceeded文案，不再使用，但保留以防万一
                 no_info_found: "抱歉，我在网络上找不到关于这家公司的有效信息。请尝试使用公司的官方全称再试一次。",
                 connection_error: "发生连接错误，请检查网络或联系开发者。",
                 loading_statuses: ["正在连接AI大脑...", "正在全网搜索公司信息...", "正在阅读相关新闻与评价...", "正在召唤 Gemini 进行深度分析...", "即将完成，正在生成报告..."],
@@ -374,25 +373,34 @@
 
             try {
                 const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ companyName: smartPasteBox.value, resumeText: resumeTextInput.value, language: currentLang }) });
-                const result = await response.json();
+                
+                // --- ✨ 核心修正：更稳健的错误处理逻辑 ---
+                const responseText = await response.text(); // 1. 先获取原始文本
                 clearInterval(loadingInterval);
+
+                let result;
+                try {
+                    result = JSON.parse(responseText); // 2. 尝试解析为JSON
+                } catch (e) {
+                    // 3. 如果解析失败，将原始文本作为错误消息
+                    result = { error: 'parse_error', message: responseText };
+                }
 
                 if (response.ok) {
                     fullReportData = result.report;
-                    companyNameData = result.company_name; // 缓存公司名
+                    companyNameData = result.company_name;
                     sourcesData = result.sources;
                     renderReport();
                 } else {
-                     let errorMessage = t.connection_error;
-                     // --- ✨ 核心修正: 读取后端返回的动态错误信息 ---
-                     if (response.status === 429) {
-                         errorMessage = result.message || t.connection_error; // 优先使用后端消息
-                     } else if (response.status === 404) {
-                         errorMessage = t.no_info_found;
-                     }
-                     resultContainer.innerHTML = `<h2 style="color: var(--danger-color);">Error</h2><p style="white-space: pre-wrap;">${errorMessage}</p>`;
+                    // 4. 现在可以安全地使用 result.message
+                    let errorMessage = result.message || t.connection_error;
+                    if (response.status === 404) {
+                        errorMessage = t.no_info_found;
+                    }
+                    resultContainer.innerHTML = `<h2 style="color: var(--danger-color);">Error</h2><p style="white-space: pre-wrap;">${errorMessage}</p>`;
                 }
             } catch (error) {
+                // 这个 catch 现在只处理真正的网络故障
                 clearInterval(loadingInterval);
                 resultContainer.innerHTML = `<h2>Error</h2><p>${t.connection_error}</p>`;
             } finally {
