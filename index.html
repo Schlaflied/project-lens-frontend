@@ -186,7 +186,7 @@
                 button_text: '开始分析', button_loading_text: '分析中...',
                 support_text: "请开发者喝杯咖啡",
                 welcome_title: "欢迎来到 Project Lens！", welcome_p1: "我能帮你一键分析公司文化，避免求职踩坑。请在左侧输入信息，开始你的第一次探索吧！",
-                rate_limit_exceeded: "开拓者，您今日的免费分析额度已用尽！🚀\n\nProject Lens 每天为所有用户提供5次免费分析。",
+                // 旧的rate_limit_exceeded文案，不再使用，但保留以防万一
                 no_info_found: "抱歉，我在网络上找不到关于这家公司的有效信息。请尝试使用公司的官方全称再试一次。",
                 connection_error: "发生连接错误，请检查网络或联系开发者。",
                 loading_statuses: ["正在连接AI大脑...", "正在全网搜索公司信息...", "正在阅读相关新闻与评价...", "正在召唤 Gemini 进行深度分析...", "即将完成，正在生成报告..."],
@@ -225,7 +225,6 @@
                 button_text: '開始分析', button_loading_text: '分析中...',
                 support_text: "請開發者喝杯咖啡",
                 welcome_title: "歡迎來到 Project Lens！", welcome_p1: "我能幫你一鍵分析公司文化，避免求職踩坑。請在左側輸入資訊，開始你的第一次探索吧！",
-                rate_limit_exceeded: "開拓者，您今日的免費分析額度已用盡！🚀\n\nProject Lens 每天為所有用戶提供5次免費分析。",
                 no_info_found: "抱歉，我在網路上找不到關於這家公司的有效資訊。請嘗試使用公司的官方全名再試一次。",
                 connection_error: "發生連接錯誤，請檢查網路或聯絡開發者。",
                 loading_statuses: ["正在連接AI大腦...", "正在全網搜尋公司資訊...", "正在閱讀相關新聞與評價...", "正在召喚 Gemini 進行深度分析...", "即將完成，正在生成報告..."],
@@ -264,7 +263,6 @@
                 button_text: 'Analyze', button_loading_text: 'Analyzing...',
                 support_text: "Buy me a coffee",
                 welcome_title: "Welcome to Project Lens!", welcome_p1: "I can help you analyze company culture with one click to avoid job-hunting pitfalls. Please enter the info on the left to start your first exploration!",
-                rate_limit_exceeded: "Explorer, you have used up your free analysis quota for today! 🚀\n\nProject Lens provides 5 free analyses per day for all users.",
                 no_info_found: "Sorry, I couldn't find any valid information about this company online. Please try again using the company's official full name.",
                 connection_error: "Connection error. Please check your network or contact the developer.",
                 loading_statuses: ["Connecting to the AI brain...", "Searching for company info across the web...", "Reading related news and reviews...", "Summoning Gemini for deep analysis...", "Finalizing, generating report..."],
@@ -386,8 +384,12 @@
                     renderReport();
                 } else {
                      let errorMessage = t.connection_error;
-                     if (response.status === 429) errorMessage = t.rate_limit_exceeded;
-                     else if (response.status === 404) errorMessage = t.no_info_found;
+                     // --- ✨ 核心修正: 读取后端返回的动态错误信息 ---
+                     if (response.status === 429) {
+                         errorMessage = result.message || t.connection_error; // 优先使用后端消息
+                     } else if (response.status === 404) {
+                         errorMessage = t.no_info_found;
+                     }
                      resultContainer.innerHTML = `<h2 style="color: var(--danger-color);">Error</h2><p style="white-space: pre-wrap;">${errorMessage}</p>`;
                 }
             } catch (error) {
@@ -410,4 +412,3 @@
     </script>
 </body>
 </html>
-
