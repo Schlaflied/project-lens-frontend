@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v21.0 - Clickable Citation</title>
+    <title>职场透镜 (Project Lens) v22.0 - Perfect Citation</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -19,7 +19,6 @@
             --text-color: #333333; --text-secondary-color: #777777; --border-color: #e0e0e0; 
             --info-color: #007bff;
         }
-        /* [最终修复] 增加平滑滚动效果 */
         html { scroll-behavior: smooth; }
         body { font-family: 'Inter', 'Noto Sans SC', 'Noto Sans TC', sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 20px; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
         .header { width: 100%; max-width: 1400px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; }
@@ -60,7 +59,6 @@
         .progress-bar-container { width: 100%; background-color: var(--border-color); border-radius: 10px; height: 20px; overflow: hidden; margin-top: 10px; }
         .progress-bar { height: 100%; background: linear-gradient(90deg, rgba(155,89,182,1) 0%, rgba(142,68,173,1) 100%); border-radius: 10px; text-align: center; color: white; font-weight: bold; line-height: 20px; transition: width 0.5s ease-in-out; }
         html.light-mode .progress-bar { background: linear-gradient(90deg, rgba(0,123,255,1) 0%, rgba(0,110,235,1) 100%); }
-        /* [最终修复] 引用链接样式 */
         .citation-link { color: var(--primary-color); text-decoration: none; font-weight: bold; vertical-align: super; font-size: 0.8em; margin: 0 2px; }
         .citation-link:hover { text-decoration: underline; }
         .sources-container { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
@@ -323,11 +321,11 @@
             // [最终修复] 核心渲染逻辑
             const processText = text => {
                 if (!text) return '';
-                // 1. 让 marked.js 把 [25](#source-25) 翻译成 <a href="#source-25">[25]</a>
-                const rawHtml = marked.parse(text);
-                // 2. 给翻译好的 a 标签加上我们的自定义样式
-                const styledHtml = rawHtml.replace(/<a href="#(source-\d+)">/g, '<a href="#$1" class="citation-link">');
-                return styledHtml;
+                // 使用 marked.js 将 [ID](#source-ID) 正确渲染为 <a href="#source-ID">[ID]</a>
+                // 同时确保没有其他 Markdown 意外渲染。
+                const rawHtml = marked.parse(text, { breaks: true });
+                // 使用正则表达式给生成的 <a> 标签加上样式类
+                return rawHtml.replace(/<a href="#(source-\d+)">/g, '<a href="#$1" class="citation-link">');
             };
             
             const selectedAspects = Array.from(aspectTagsContainer.querySelectorAll('input:checked')).map(input => input.value);
