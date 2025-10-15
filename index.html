@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v19.0 - Geo & Timeliness Aware</title>
+    <title>职场透镜 (Project Lens) v21.0 - Clickable Citation</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -19,6 +19,8 @@
             --text-color: #333333; --text-secondary-color: #777777; --border-color: #e0e0e0; 
             --info-color: #007bff;
         }
+        /* [最终修复] 增加平滑滚动效果 */
+        html { scroll-behavior: smooth; }
         body { font-family: 'Inter', 'Noto Sans SC', 'Noto Sans TC', sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 20px; box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
         .header { width: 100%; max-width: 1400px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 24px; font-weight: 700; }
@@ -58,6 +60,7 @@
         .progress-bar-container { width: 100%; background-color: var(--border-color); border-radius: 10px; height: 20px; overflow: hidden; margin-top: 10px; }
         .progress-bar { height: 100%; background: linear-gradient(90deg, rgba(155,89,182,1) 0%, rgba(142,68,173,1) 100%); border-radius: 10px; text-align: center; color: white; font-weight: bold; line-height: 20px; transition: width 0.5s ease-in-out; }
         html.light-mode .progress-bar { background: linear-gradient(90deg, rgba(0,123,255,1) 0%, rgba(0,110,235,1) 100%); }
+        /* [最终修复] 引用链接样式 */
         .citation-link { color: var(--primary-color); text-decoration: none; font-weight: bold; vertical-align: super; font-size: 0.8em; margin: 0 2px; }
         .citation-link:hover { text-decoration: underline; }
         .sources-container { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); }
@@ -188,7 +191,6 @@
                 welcome_title: "欢迎来到 Project Lens！", welcome_p1: "我能帮你一键分析公司文化，避免求职踩坑。请在左侧输入信息，开始你的第一次探索吧！",
                 no_info_found: "抱歉，我在网络上找不到关于这家公司的有效信息。请尝试使用公司的官方全称再试一次。",
                 connection_error: "发生连接错误，请检查网络或联系开发者。",
-                // ✨ 新增：将后端的多语言文案库移至此处，作为备用方案
                 rate_limit_exceeded: "开拓者，你已经用完了今日的额度。🚀 Project Lens每天为用户提供五次免费公司查询，如果你是重度用户，通过订阅Pro（Coming Soon）或者请我喝杯咖啡☕️来重置查询次数。",
                 loading_statuses: ["正在连接AI大脑...", "正在全网搜索公司信息...", "正在阅读相关新闻与评价...", "正在召唤 Gemini 进行深度分析...", "即将完成，正在生成报告..."],
                 report_titles: {
@@ -294,7 +296,7 @@
             }
         };
 
-        // --- 6. 核心函数 [已升级] ---
+        // --- 6. 核心函数 [已修复] ---
         function setLanguage(langCode) {
             currentLang = langCode; document.documentElement.lang = langCode;
             const t = translations[currentLang];
@@ -318,13 +320,18 @@
             const aspects = t.aspects;
             const defs = t.definitions;
 
-            const sourceLinkMap = {};
-            sourcesData.forEach(source => { sourceLinkMap[source.id] = source.link; });
-
-            const processText = text => text ? marked.parse(text.replace(/\[(\d+)\]/g, (match, id) => sourceLinkMap[id] ? `<a href="${sourceLinkMap[id]}" target="_blank" rel="noopener noreferrer" class="citation-link">[${id}]</a>` : match)) : '';
+            // [最终修复] 核心渲染逻辑
+            const processText = text => {
+                if (!text) return '';
+                // 1. 让 marked.js 把 [25](#source-25) 翻译成 <a href="#source-25">[25]</a>
+                const rawHtml = marked.parse(text);
+                // 2. 给翻译好的 a 标签加上我们的自定义样式
+                const styledHtml = rawHtml.replace(/<a href="#(source-\d+)">/g, '<a href="#$1" class="citation-link">');
+                return styledHtml;
+            };
+            
             const selectedAspects = Array.from(aspectTagsContainer.querySelectorAll('input:checked')).map(input => input.value);
             
-            // 【核心优化】新增报告头，显示公司名和地点
             const reportHeaderHTML = `<div class="report-header"><div class="company-name">${companyNameData}</div><div class="company-location">${fullReportData.company_location || ''}</div></div>`;
 
             const redFlagHTML = fullReportData.red_flag_text ? `<div class="report-section success"><h2>${titles.red_flag}</h2><div class="status">${processText(fullReportData.red_flag_status)}</div>${processText(fullReportData.red_flag_text)}</div>` : '';
@@ -349,6 +356,7 @@
             
             let sourcesHTML = `<h2>${titles.sources}</h2>`;
             sourcesData.forEach(source => {
+                // [最终修复] 给每个文献条目加上对应的 id，这样锚点链接才能找到它
                 sourcesHTML += `<div class="source-item" id="source-${source.id}">${ICONS[source.source_type] || ICONS.default}<span>[${source.id}]</span><a href="${source.link}" target="_blank" rel="noopener noreferrer">${source.title}</a></div>`;
             });
             sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_TAGS: ['div', 'span', 'a', 'svg', 'path'], ADD_ATTR: ['id', 'href', 'target', 'rel', 'class', 'xmlns', 'width', 'height', 'fill', 'viewBox', 'd', 'fill-rule']});
@@ -378,15 +386,13 @@
             try {
                 const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ companyName: smartPasteBox.value, resumeText: resumeTextInput.value, language: currentLang }) });
                 
-                // --- ✨ 核心修正：更稳健的错误处理逻辑 ---
-                const responseText = await response.text(); // 1. 先获取原始文本
+                const responseText = await response.text(); 
                 clearInterval(loadingInterval);
 
                 let result;
                 try {
-                    result = JSON.parse(responseText); // 2. 尝试解析为JSON
+                    result = JSON.parse(responseText); 
                 } catch (e) {
-                    // 3. 如果解析失败，将原始文本作为错误消息
                     result = { error: 'parse_error', message: responseText };
                 }
 
@@ -396,10 +402,8 @@
                     sourcesData = result.sources;
                     renderReport();
                 } else {
-                    // 4. 现在可以安全地使用 result.message
                     let errorMessage = result.message || t.connection_error;
                      if (response.status === 429) {
-                        // 如果后端没返回message，就用我们本地的备用文案
                         errorMessage = result.message || t.rate_limit_exceeded;
                     } else if (response.status === 404) {
                         errorMessage = t.no_info_found;
@@ -407,7 +411,6 @@
                     resultContainer.innerHTML = `<h2 style="color: var(--danger-color);">Error</h2><p style="white-space: pre-wrap;">${errorMessage}</p>`;
                 }
             } catch (error) {
-                // 这个 catch 现在只处理真正的网络故障
                 clearInterval(loadingInterval);
                 resultContainer.innerHTML = `<h2>Error</h2><p>${t.connection_error}</p>`;
             } finally {
