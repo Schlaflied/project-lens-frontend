@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>职场透镜 (Project Lens) v22.0 - Perfect Citation</title>
+    <title>职场透镜 (Project Lens) v22.1 - Clean Citation</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.8/dist/purify.min.js"></script>
     <style>
@@ -318,13 +318,16 @@
             const aspects = t.aspects;
             const defs = t.definitions;
 
-            // [最终修复] 核心渲染逻辑
+            // [核心修改] 渲染报告文本的处理函数
             const processText = text => {
                 if (!text) return '';
-                // 使用 marked.js 将 [ID](#source-ID) 正确渲染为 <a href="#source-ID">[ID]</a>
-                // 同时确保没有其他 Markdown 意外渲染。
-                const rawHtml = marked.parse(text, { breaks: true });
-                // 使用正则表达式给生成的 <a> 标签加上样式类
+                // 1. 在解析Markdown之前，先把多余的 (#source-...) 文本删掉
+                const cleanedText = text.replace(/\s?\((#source-\d+)\)/g, '');
+
+                // 2. 使用 marked.js 将 [ID](#source-ID) 正常渲染为链接
+                const rawHtml = marked.parse(cleanedText, { breaks: true });
+
+                // 3. 使用正则表达式给生成的 <a> 标签加上样式类，使其变为蓝色上标
                 return rawHtml.replace(/<a href="#(source-\d+)">/g, '<a href="#$1" class="citation-link">');
             };
             
@@ -354,7 +357,7 @@
             
             let sourcesHTML = `<h2>${titles.sources}</h2>`;
             sourcesData.forEach(source => {
-                // [最终修复] 给每个文献条目加上对应的 id，这样锚点链接才能找到它
+                // 给每个文献条目加上对应的 id，这样锚点链接才能找到它
                 sourcesHTML += `<div class="source-item" id="source-${source.id}">${ICONS[source.source_type] || ICONS.default}<span>[${source.id}]</span><a href="${source.link}" target="_blank" rel="noopener noreferrer">${source.title}</a></div>`;
             });
             sourcesContainer.innerHTML = DOMPurify.sanitize(sourcesHTML, {ADD_TAGS: ['div', 'span', 'a', 'svg', 'path'], ADD_ATTR: ['id', 'href', 'target', 'rel', 'class', 'xmlns', 'width', 'height', 'fill', 'viewBox', 'd', 'fill-rule']});
@@ -428,4 +431,3 @@
     </script>
 </body>
 </html>
-
