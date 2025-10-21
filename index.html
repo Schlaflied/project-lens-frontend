@@ -324,11 +324,10 @@
             // [核心修改] 渲染报告文本的处理函数
             const processText = text => {
                 if (!text) return '';
-                // 1. 在解析Markdown之前，先把多余的 (#source-...) 文本删掉
-                const cleanedText = text.replace(/\s?[\(（]#source[ -]\d+[\)）]/g, '');
+                // 1. [已修复] 此处不再需要手动清理，直接交给 marked.js 处理
 
                 // 2. 使用 marked.js 将 [ID](#source-ID) 正常渲染为链接
-                const rawHtml = marked.parse(cleanedText, { breaks: true });
+                const rawHtml = marked.parse(text, { breaks: true });
 
                 // 3. 将 marked.js 生成的锚点链接替换为完整的、带方括号的、指向外部来源的直接链接
                 return rawHtml.replace(/<a href=['"]#source-(\d+)['"]>(\d+)<\/a>/g, (match, sourceId, linkText) => {
