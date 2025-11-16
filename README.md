@@ -1,4 +1,4 @@
-# 🔬 Project Lens / 职场透镜 - 前端
+# 🔬 Project Lens / 职场透镜 - 前端（Frontend）
 
 An AI-driven web application that provides deep insights into a company's culture, operations, and public perception, helping job seekers avoid pitfalls and identify legitimate opportunities.
 
